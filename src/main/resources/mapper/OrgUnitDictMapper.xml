@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.OrgDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpOrgUnitDict">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="DEFINITION_TYPE" jdbcType="VARCHAR" property="definitionType"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="PARENT_ID" jdbcType="VARCHAR" property="parentId"/>
+    </resultMap>
+    <select id="getOrg" parameterType="map" resultType="com.spinfosec.dao.entity.SpOrgUnitDict">
+        SELECT ID as id,NAME AS name,DEFINITION_TYPE AS definitionType,DESCRIPTION AS description,PARENT_ID AS parentId
+        FROM sp_org_unit_dict
+        WHERE 1 = 1
+        <if test="name != null">
+            AND NAME Like concat(concat("%",#{name}),"%")
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY NAME
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="getParentOrg" parameterType="java.util.HashMap" resultType="com.spinfosec.dao.entity.SpOrgUnitDict">
+        SELECT ID as id,NAME AS name,DEFINITION_TYPE AS definitionType,DESCRIPTION AS description,PARENT_ID AS parentId
+        FROM sp_org_unit_dict
+        WHERE PARENT_ID IS NULL
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY NAME
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="getOrgByParId" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpOrgUnitDict">
+         SELECT ID as id,NAME AS name,DEFINITION_TYPE AS definitionType,DESCRIPTION AS description,PARENT_ID AS parentId
+        FROM sp_org_unit_dict WHERE PARENT_ID = #{parentId}
+    </select>
+
+
+    <select id="getOrgById" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpOrgUnitDict">
+         SELECT
+         ID as id,
+         NAME AS name,
+         DEFINITION_TYPE AS definitionType,
+         DESCRIPTION AS description,
+         PARENT_ID AS parentId
+        FROM sp_org_unit_dict WHERE ID = #{id}
+    </select>
+
+    <select id="getUserByOrgId" parameterType="java.lang.String" resultType="java.util.LinkedHashMap">
+        SELECT a.NAME as name,a.USERNAME AS userName,o.ID AS orgId,o.NAME AS orgName FROM sp_admins a,sp_org_admin_relation oa,sp_org_unit_dict o
+          WHERE  a.ID = oa.ADMIN_ID  AND oa.ORG_ID = o.ID AND o.ID = #{orgId}
+    </select>
+
+    <insert id="saveOrg">
+      INSERT INTO sp_org_unit_dict (ID, NAME, DEFINITION_TYPE,
+      DESCRIPTION, PARENT_ID)
+      VALUES (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{definitionType,jdbcType=VARCHAR},
+      #{description,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateOrg" parameterType="com.spinfosec.dao.entity.SpOrgUnitDict">
+        UPDATE sp_org_unit_dict
+        SET NAME = #{name,jdbcType=VARCHAR},
+        DEFINITION_TYPE = #{definitionType,jdbcType=VARCHAR},
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+        PARENT_ID = #{parentId,jdbcType=VARCHAR}
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteOrgById" parameterType="java.lang.String">
+        DELETE FROM  sp_org_unit_dict
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <delete id="deleteUserAndOrg" parameterType="java.lang.String">
+        DELETE FROM sp_org_admin_relation WHERE ORG_ID = #{orgId}
+    </delete>
+</mapper>

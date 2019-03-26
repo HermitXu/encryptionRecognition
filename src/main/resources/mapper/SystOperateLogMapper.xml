@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.SysOperateLogDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpSystemOperateLogInfo">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="DISCRIMINATOR" jdbcType="VARCHAR" property="discriminator"/>
+        <result column="ADMIN_NAME" jdbcType="VARCHAR" property="adminName"/>
+        <result column="ADMIN_ID" jdbcType="VARCHAR" property="adminId"/>
+        <result column="ROLE_NAME" jdbcType="VARCHAR" property="roleName"/>
+        <result column="ROLE_ID" jdbcType="VARCHAR" property="roleId"/>
+        <result column="TRANSACTION_ID" jdbcType="VARCHAR" property="transactionId"/>
+        <result column="IS_LEADER_FOR_TX" jdbcType="DECIMAL" property="isLeaderForTx"/>
+        <result column="MESSAGE" jdbcType="VARCHAR" property="message"/>
+        <result column="GENERATION_TIME_TS" jdbcType="VARCHAR" property="generationTimeTs"/>
+        <result column="ENTITY_TYPE" jdbcType="VARCHAR" property="entityType"/>
+        <result column="OPERATION" jdbcType="VARCHAR" property="operation"/>
+        <result column="ENTITY_ID" jdbcType="VARCHAR" property="entityId"/>
+        <result column="BUSINESS_ID" jdbcType="VARCHAR" property="businessId"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    ID, DISCRIMINATOR, ADMIN_NAME, ADMIN_ID, ROLE_NAME, ROLE_ID, TRANSACTION_ID, IS_LEADER_FOR_TX, 
+    MESSAGE, GENERATION_TIME_TS, ENTITY_TYPE, OPERATION, ENTITY_ID, BUSINESS_ID
+  </sql>
+
+    <select id="queryOperateLog" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dao.entity.SpSystemOperateLogInfo">
+        SELECT
+        ID AS id,
+        ADMIN_NAME AS adminName,
+        ADMIN_ID AS adminId,
+        ROLE_NAME AS roleName,
+        ROLE_ID AS roleId,
+        TRANSACTION_ID AS transactionId,
+        IS_LEADER_FOR_TX AS isLeaderForTx, MESSAGE ASmessage,
+        DATE_FORMAT(GENERATION_TIME_TS, '%Y-%m-%d %H:%i:%s') AS generationTimeTs,
+        ENTITY_TYPE AS entityType,
+        OPERATION AS operation,
+        ENTITY_ID AS entityId,
+        BUSINESS_ID AS businessId,
+        RESULT AS result
+        FROM sp_system_operate_log_info WHERE 1 = 1
+        <if test="adminName != null">
+            AND ADMIN_NAME Like concat(concat("%",#{adminName}),"%")
+        </if>
+        <if test="roleName != null">
+            AND ROLE_NAME Like concat(concat("%",#{roleName}),"%")
+        </if>
+        <if test="operation != null">
+            AND OPERATION Like concat(concat("%",#{operation}),"%")
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY GENERATION_TIME_TS
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+    
+    <insert id="saveOperateLog" parameterType="com.spinfosec.dao.entity.SpSystemOperateLogInfo">
+    insert into sp_system_operate_log_info (ID, DISCRIMINATOR, ADMIN_NAME, 
+      ADMIN_ID, ROLE_NAME, ROLE_ID, 
+      TRANSACTION_ID, IS_LEADER_FOR_TX, MESSAGE, 
+      GENERATION_TIME_TS, ENTITY_TYPE, OPERATION, 
+      ENTITY_ID, BUSINESS_ID,RESULT)
+    values (#{id,jdbcType=VARCHAR}, #{discriminator,jdbcType=VARCHAR}, #{adminName,jdbcType=VARCHAR}, 
+      #{adminId,jdbcType=VARCHAR}, #{roleName,jdbcType=VARCHAR}, #{roleId,jdbcType=VARCHAR}, 
+      #{transactionId,jdbcType=VARCHAR}, #{isLeaderForTx,jdbcType=DECIMAL}, #{message,jdbcType=VARCHAR}, 
+      #{generationTimeTs,jdbcType=TIMESTAMP}, #{entityType,jdbcType=VARCHAR}, #{operation,jdbcType=VARCHAR}, 
+      #{entityId,jdbcType=VARCHAR}, #{businessId,jdbcType=VARCHAR}, #{result,jdbcType=VARCHAR})
+  </insert>
+
+    <update id="updateOperateLog" parameterType="com.spinfosec.dao.entity.SpSystemOperateLogInfo">
+    update sp_system_operate_log_info
+    set DISCRIMINATOR = #{discriminator,jdbcType=VARCHAR},
+      ADMIN_NAME = #{adminName,jdbcType=VARCHAR},
+      ADMIN_ID = #{adminId,jdbcType=VARCHAR},
+      ROLE_NAME = #{roleName,jdbcType=VARCHAR},
+      ROLE_ID = #{roleId,jdbcType=VARCHAR},
+      TRANSACTION_ID = #{transactionId,jdbcType=VARCHAR},
+      IS_LEADER_FOR_TX = #{isLeaderForTx,jdbcType=DECIMAL},
+      MESSAGE = #{message,jdbcType=VARCHAR},
+      GENERATION_TIME_TS = #{generationTimeTs,jdbcType=TIMESTAMP},
+      ENTITY_TYPE = #{entityType,jdbcType=VARCHAR},
+      OPERATION = #{operation,jdbcType=VARCHAR},
+      ENTITY_ID = #{entityId,jdbcType=VARCHAR},
+      BUSINESS_ID = #{businessId,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+
+    <delete id="deleteOperateLogByQueryMap" parameterType="java.util.HashMap">
+        DELETE FROM  sp_system_operate_log_info
+        WHERE 1 = 1
+        AND GENERATION_TIME_TS BETWEEN #{start} AND #{end}
+    </delete>
+
+    <delete id="deleteOperateLogById" parameterType="java.lang.String">
+        delete from sp_system_operate_log_info
+        where ID = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="countSystemOperateLogByCondition" parameterType="java.util.HashMap" resultType="java.lang.Long">
+        SELECT COUNT(ID) FROM sp_system_operate_log_info WHERE GENERATION_TIME_TS BETWEEN #{start} AND #{end}
+    </select>
+
+    <select id="countSystemOperateLog" resultType="java.lang.Long">
+        SELECT COUNT(ID) FROM sp_system_operate_log_info
+    </select>
+</mapper>

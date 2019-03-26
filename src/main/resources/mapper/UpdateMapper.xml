@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.UpdateDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpUpdateServerPackage">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="SYSTEM_TYPE" jdbcType="VARCHAR" property="systemType"/>
+        <result column="VERSION" jdbcType="VARCHAR" property="version"/>
+        <result column="TIME_STAMP" jdbcType="VARCHAR" property="timeStamp"/>
+        <result column="SECONDARY_VERSION" jdbcType="VARCHAR" property="secondaryVersion"/>
+        <result column="PATH" jdbcType="VARCHAR" property="path"/>
+        <result column="PATH_RELATIVE" jdbcType="VARCHAR" property="pathRelative"/>
+        <result column="SRC_PATH" jdbcType="VARCHAR" property="srcPath"/>
+        <result column="UPLOAD_TIME" jdbcType="VARCHAR" property="uploadTime"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="FILE_SIZE" jdbcType="VARCHAR" property="fileSize"/>
+        <result column="FILE_TYPE" jdbcType="VARCHAR" property="fileType"/>
+        <result column="DEPLOY_STATUS" jdbcType="VARCHAR" property="deployStatus"/>
+        <result column="ERROR_CODE" jdbcType="VARCHAR" property="errorCode"/>
+        <result column="DEPLOY_MSG" jdbcType="VARCHAR" property="deployMsg"/>
+        <result column="DEPLOY_TIME" jdbcType="VARCHAR" property="deployTime"/>
+        <result column="VERSION_TYPE" jdbcType="VARCHAR" property="versionType"/>
+        <result column="SERVER_TYPE" jdbcType="VARCHAR" property="serverType"/>
+        <result column="BAK1" jdbcType="VARCHAR" property="bak1"/>
+        <result column="BAK2" jdbcType="VARCHAR" property="bak2"/>
+        <result column="BAK3" jdbcType="VARCHAR" property="bak3"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID, SYSTEM_TYPE, VERSION, TIME_STAMP, SECONDARY_VERSION, PATH, PATH_RELATIVE, SRC_PATH,
+        UPLOAD_TIME, DESCRIPTION, FILE_SIZE, FILE_TYPE, DEPLOY_STATUS, ERROR_CODE, DEPLOY_MSG,
+        DEPLOY_TIME, VERSION_TYPE, SERVER_TYPE, BAK1, BAK2, BAK3
+    </sql>
+
+    <select id="queryUpPackage" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dao.entity.SpUpdateServerPackage">
+        SELECT
+        u.ID AS id,
+        u.SYSTEM_TYPE AS systemType,
+        u.VERSION AS version,
+        u.TIME_STAMP AS timeStamp,
+        u.SECONDARY_VERSION AS secondaryVersion,
+        u.PATH AS path,
+        u.PATH_RELATIVE AS pathRelative,
+        u.SRC_PATH AS srcPath,
+        u.UPLOAD_TIME AS uploadTime,
+        u.DESCRIPTION AS description,
+        u.FILE_SIZE AS fileSize,
+        u.FILE_TYPE AS fileType,
+        u.DEPLOY_STATUS AS deployStatus,
+        u.ERROR_CODE AS errorCode,
+        u.DEPLOY_MSG AS deployMsg,
+        u.DEPLOY_TIME AS deployTime,
+        u.VERSION_TYPE AS versionType,
+        u.SERVER_TYPE AS serverType,
+        u.BAK1 AS bak1,
+        u.BAK2 AS bak2,
+        u.BAK3 AS bak3
+        FROM sp_update_server_package u WHERE 1 = 1
+        <if test="systemType != null">
+            AND u.SYSTEM_TYPE = #{systemType}
+        </if>
+        <if test="version != null">
+            AND u.VERSION = #{version}
+        </if>
+        <if test="timeStamp != null">
+            AND u.TIME_STAMP = #{timeStamp}
+        </if>
+        <if test="secondaryVersion != null">
+            AND u.SECONDARY_VERSION = #{secondaryVersion}
+        </if>
+        <if test="srcPath != null">
+            AND u.SRC_PATH = #{srcPath}
+        </if>
+        <if test="bak1 != null">
+            AND u.BAK1 = #{bak1}
+        </if>
+
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY u.VERSION
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="getUpdatePackageById" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpUpdateServerPackage">
+         SELECT
+        u.ID AS id,
+        u.SYSTEM_TYPE AS systemType,
+        u.VERSION AS version,
+        u.TIME_STAMP AS timeStamp,
+        u.SECONDARY_VERSION AS secondaryVersion,
+        u.PATH AS path,
+        u.PATH_RELATIVE AS pathRelative,
+        u.SRC_PATH AS srcPath,
+        u.UPLOAD_TIME AS uploadTime,
+        u.DESCRIPTION AS description,
+        u.FILE_SIZE AS fileSize,
+        u.FILE_TYPE AS fileType,
+        u.DEPLOY_STATUS AS deployStatus,
+        u.ERROR_CODE AS errorCode,
+        u.DEPLOY_MSG AS deployMsg,
+        u.DEPLOY_TIME AS deployTime,
+        u.VERSION_TYPE AS versionType,
+        u.SERVER_TYPE AS serverType,
+        u.BAK1 AS bak1,
+        u.BAK2 AS bak2,
+        u.BAK3 AS bak3
+        FROM sp_update_server_package u WHERE u.ID = #{id}
+    </select>
+
+    <insert id="saveUpdatePackage" parameterType="com.spinfosec.dao.entity.SpUpdateServerPackage">
+        INSERT INTO sp_update_server_package
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="systemType != null">
+                SYSTEM_TYPE,
+            </if>
+            <if test="version != null">
+                VERSION,
+            </if>
+            <if test="timeStamp != null">
+                TIME_STAMP,
+            </if>
+            <if test="secondaryVersion != null">
+                SECONDARY_VERSION,
+            </if>
+            <if test="path != null">
+                PATH,
+            </if>
+            <if test="pathRelative != null">
+                PATH_RELATIVE,
+            </if>
+            <if test="srcPath != null">
+                SRC_PATH,
+            </if>
+            <if test="uploadTime != null">
+                UPLOAD_TIME,
+            </if>
+            <if test="description != null">
+                DESCRIPTION,
+            </if>
+            <if test="fileSize != null">
+                FILE_SIZE,
+            </if>
+            <if test="fileType != null">
+                FILE_TYPE,
+            </if>
+            <if test="deployStatus != null">
+                DEPLOY_STATUS,
+            </if>
+            <if test="errorCode != null">
+                ERROR_CODE,
+            </if>
+            <if test="deployMsg != null">
+                DEPLOY_MSG,
+            </if>
+            <if test="deployTime != null">
+                DEPLOY_TIME,
+            </if>
+            <if test="versionType != null">
+                VERSION_TYPE,
+            </if>
+            <if test="serverType != null">
+                SERVER_TYPE,
+            </if>
+            <if test="bak1 != null">
+                BAK1,
+            </if>
+            <if test="bak2 != null">
+                BAK2,
+            </if>
+            <if test="bak3 != null">
+                BAK3,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="systemType != null">
+                #{systemType,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=VARCHAR},
+            </if>
+            <if test="timeStamp != null">
+                #{timeStamp,jdbcType=VARCHAR},
+            </if>
+            <if test="secondaryVersion != null">
+                #{secondaryVersion,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="pathRelative != null">
+                #{pathRelative,jdbcType=VARCHAR},
+            </if>
+            <if test="srcPath != null">
+                #{srcPath,jdbcType=VARCHAR},
+            </if>
+            <if test="uploadTime != null">
+                #{uploadTime,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="fileSize != null">
+                #{fileSize,jdbcType=VARCHAR},
+            </if>
+            <if test="fileType != null">
+                #{fileType,jdbcType=VARCHAR},
+            </if>
+            <if test="deployStatus != null">
+                #{deployStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="errorCode != null">
+                #{errorCode,jdbcType=VARCHAR},
+            </if>
+            <if test="deployMsg != null">
+                #{deployMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="deployTime != null">
+                #{deployTime,jdbcType=VARCHAR},
+            </if>
+            <if test="versionType != null">
+                #{versionType,jdbcType=VARCHAR},
+            </if>
+            <if test="serverType != null">
+                #{serverType,jdbcType=VARCHAR},
+            </if>
+            <if test="bak1 != null">
+                #{bak1,jdbcType=VARCHAR},
+            </if>
+            <if test="bak2 != null">
+                #{bak2,jdbcType=VARCHAR},
+            </if>
+            <if test="bak3 != null">
+                #{bak3,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateUpdatePackage" parameterType="com.spinfosec.dao.entity.SpUpdateServerPackage">
+        UPDATE sp_update_server_package
+        <set>
+            <if test="systemType != null">
+                SYSTEM_TYPE = #{systemType,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                VERSION = #{version,jdbcType=VARCHAR},
+            </if>
+            <if test="timeStamp != null">
+                TIME_STAMP = #{timeStamp,jdbcType=VARCHAR},
+            </if>
+            <if test="secondaryVersion != null">
+                SECONDARY_VERSION = #{secondaryVersion,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                PATH = #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="pathRelative != null">
+                PATH_RELATIVE = #{pathRelative,jdbcType=VARCHAR},
+            </if>
+            <if test="srcPath != null">
+                SRC_PATH = #{srcPath,jdbcType=VARCHAR},
+            </if>
+            <if test="uploadTime != null">
+                UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                DESCRIPTION = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="fileSize != null">
+                FILE_SIZE = #{fileSize,jdbcType=VARCHAR},
+            </if>
+            <if test="fileType != null">
+                FILE_TYPE = #{fileType,jdbcType=VARCHAR},
+            </if>
+            <if test="deployStatus != null">
+                DEPLOY_STATUS = #{deployStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="errorCode != null">
+                ERROR_CODE = #{errorCode,jdbcType=VARCHAR},
+            </if>
+            <if test="deployMsg != null">
+                DEPLOY_MSG = #{deployMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="deployTime != null">
+                DEPLOY_TIME = #{deployTime,jdbcType=VARCHAR},
+            </if>
+            <if test="versionType != null">
+                VERSION_TYPE = #{versionType,jdbcType=VARCHAR},
+            </if>
+            <if test="serverType != null">
+                SERVER_TYPE = #{serverType,jdbcType=VARCHAR},
+            </if>
+            <if test="bak1 != null">
+                BAK1 = #{bak1,jdbcType=VARCHAR},
+            </if>
+            <if test="bak2 != null">
+                BAK2 = #{bak2,jdbcType=VARCHAR},
+            </if>
+            <if test="bak3 != null">
+                BAK3 = #{bak3,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteUpdatePackageById" parameterType="java.lang.String">
+        DELETE FROM sp_update_server_package WHERE ID = #{id}
+    </delete>
+</mapper>

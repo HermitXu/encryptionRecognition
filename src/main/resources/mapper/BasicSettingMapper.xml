@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.tactic.BasicSettingDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpConfigProperties">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="GROUP_NAME" jdbcType="VARCHAR" property="groupName"/>
+        <result column="VALUE" jdbcType="VARCHAR" property="value"/>
+        <result column="EXTRA_DATA" jdbcType="VARCHAR" property="extraData"/>
+        <result column="GROUP_ORDER" jdbcType="DECIMAL" property="groupOrder"/>
+        <result column="BUNDLE_KEY" jdbcType="VARCHAR" property="bundleKey"/>
+        <result column="DEFAULT_VALUE" jdbcType="VARCHAR" property="defaultValue"/>
+        <result column="OPTLOCK" jdbcType="DECIMAL" property="optlock"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    ID, NAME, GROUP_NAME, VALUE, EXTRA_DATA, GROUP_ORDER, BUNDLE_KEY, DEFAULT_VALUE, 
+    OPTLOCK
+  </sql>
+    <select id="getConfigByGroupName" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpConfigProperties">
+        SELECT ID AS id,NAME AS name,GROUP_NAME AS groupName,VALUE AS value,EXTRA_DATA AS extraData,GROUP_ORDER AS groupOrder,
+        BUNDLE_KEY AS bundleKey,DEFAULT_VALUE AS defaultValue
+        FROM sp_config_properties WHERE GROUP_NAME = #{groupName}
+    </select>
+
+    <insert id="saveConfigProperties" parameterType="com.spinfosec.dao.entity.SpConfigProperties">
+    INSERT INTO sp_config_properties (ID, NAME, GROUP_NAME,
+      VALUE, EXTRA_DATA, GROUP_ORDER, 
+      BUNDLE_KEY, DEFAULT_VALUE, OPTLOCK)
+    VALUES (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{groupName,jdbcType=VARCHAR},
+      #{value,jdbcType=VARCHAR}, #{extraData,jdbcType=VARCHAR}, #{groupOrder,jdbcType=DECIMAL}, 
+      #{bundleKey,jdbcType=VARCHAR}, #{defaultValue,jdbcType=VARCHAR}, #{optlock,jdbcType=DECIMAL}
+      )
+  </insert>
+    <update id="updateConfigProperties" parameterType="com.spinfosec.dao.entity.SpConfigProperties">
+        UPDATE sp_config_properties
+        <set>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="groupName != null">
+                GROUP_NAME = #{groupName,jdbcType=VARCHAR},
+            </if>
+            <if test="value != null">
+                VALUE = #{value,jdbcType=VARCHAR},
+            </if>
+            <if test="extraData != null">
+                EXTRA_DATA = #{extraData,jdbcType=VARCHAR},
+            </if>
+            <if test="groupOrder != null">
+                GROUP_ORDER = #{groupOrder,jdbcType=DECIMAL},
+            </if>
+            <if test="bundleKey != null">
+                BUNDLE_KEY = #{bundleKey,jdbcType=VARCHAR},
+            </if>
+            <if test="defaultValue != null">
+                DEFAULT_VALUE = #{defaultValue,jdbcType=VARCHAR},
+            </if>
+            <if test="optlock != null">
+                OPTLOCK = #{optlock,jdbcType=DECIMAL},
+            </if>
+        </set>
+        WHERE ID = #{id,jdbcType=VARCHAR}
+  </update>
+
+    <insert id="saveServerStatus" parameterType="com.spinfosec.dao.entity.SpServerStatus">
+      INSERT INTO  sp_server_status (ID, cpuUsage, memUsage,
+      freeDisk, GetTime, hostname,
+      netName, isEnable, hostIP,
+      totalDisk)
+      VALUES (#{id,jdbcType=INTEGER}, #{cpuUsage,jdbcType=DECIMAL}, #{memUsage,jdbcType=DECIMAL},
+      #{freeDisk,jdbcType=DECIMAL}, #{getTime,jdbcType=TIMESTAMP}, #{hostname,jdbcType=VARCHAR},
+      #{netName,jdbcType=VARCHAR}, #{isEnable,jdbcType=VARCHAR}, #{hostIp,jdbcType=VARCHAR},
+      #{totalDisk,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateServerStatus" parameterType="com.spinfosec.dao.entity.SpServerStatus">
+        UPDATE sp_server_status
+        <set>
+            <if test="cpuUsage != null">
+                cpuUsage = #{cpuUsage,jdbcType=DECIMAL},
+            </if>
+            <if test="memUsage != null">
+                memUsage = #{memUsage,jdbcType=DECIMAL},
+            </if>
+            <if test="freeDisk != null">
+                freeDisk = #{freeDisk,jdbcType=DECIMAL},
+            </if>
+            <if test="getTime != null">
+                GetTime = #{getTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="hostname != null">
+                hostname = #{hostname,jdbcType=VARCHAR},
+            </if>
+            <if test="netName != null">
+                netName = #{netName,jdbcType=VARCHAR},
+            </if>
+            <if test="isEnable != null">
+                isEnable = #{isEnable,jdbcType=VARCHAR},
+            </if>
+            <if test="hostIp != null">
+                hostIP = #{hostIp,jdbcType=VARCHAR},
+            </if>
+            <if test="totalDisk != null">
+                totalDisk = #{totalDisk,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID = #{id,jdbcType=INTEGER}
+    </update>
+
+    <select id="getServerStatus" resultType="com.spinfosec.dao.entity.SpServerStatus">
+        SELECT
+        ID AS id,
+        IFNULL(cpuUsage,0) AS cpuUsage,
+        IFNULL(memUsage,0) AS memUsage,
+        IFNULL(freeDisk,0) AS freeDisk,
+        IFNULL(GetTime,NOW()) AS getTime,
+        IFNULL(hostname,'') AS hostname,
+        IFNULL(netName,'') AS netName,
+        IFNULL(isEnable,'') AS isEnable,
+        IFNULL(hostIP,'') AS hostIp,
+        IFNULL(totalDisk,0) AS totalDisk
+        FROM sp_server_status
+    </select>
+</mapper>

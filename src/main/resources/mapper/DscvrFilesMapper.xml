@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.DscvrFilesDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpDscvrFiles">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="INC_EXTERNAL_ID" jdbcType="VARCHAR" property="incExternalId"/>
+        <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
+        <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
+        <result column="INSERT_DATE" jdbcType="TIMESTAMP" property="insertDate"/>
+        <result column="IS_AUTHORIZED" jdbcType="DECIMAL" property="isAuthorized"/>
+        <result column="DETECT_DATE_TS" jdbcType="TIMESTAMP" property="detectDateTs"/>
+        <result column="DETECT_DATE_TZ" jdbcType="VARCHAR" property="detectDateTz"/>
+        <result column="LOCAL_DETECT_TS" jdbcType="TIMESTAMP" property="localDetectTs"/>
+        <result column="LOCAL_DETECT_TZ" jdbcType="VARCHAR" property="localDetectTz"/>
+        <result column="FILE_NAME" jdbcType="VARCHAR" property="fileName"/>
+        <result column="FILE_EXTENSION" jdbcType="VARCHAR" property="fileExtension"/>
+        <result column="HOST_NAME" jdbcType="VARCHAR" property="hostName"/>
+        <result column="IP" jdbcType="VARCHAR" property="ip"/>
+        <result column="MAC" jdbcType="VARCHAR" property="mac"/>
+        <result column="FILE_SIZE" jdbcType="DECIMAL" property="fileSize"/>
+        <result column="FDATE_ACCESSED_TS" jdbcType="TIMESTAMP" property="fdateAccessedTs"/>
+        <result column="FDATE_ACCESSED_TZ" jdbcType="VARCHAR" property="fdateAccessedTz"/>
+        <result column="FDATE_CREATED_TS" jdbcType="TIMESTAMP" property="fdateCreatedTs"/>
+        <result column="FDATE_CREATED_TZ" jdbcType="VARCHAR" property="fdateCreatedTz"/>
+        <result column="FDATE_MODIFIED_TS" jdbcType="TIMESTAMP" property="fdateModifiedTs"/>
+        <result column="FDATE_MODIFIED_TZ" jdbcType="VARCHAR" property="fdateModifiedTz"/>
+        <result column="ORG_ID" jdbcType="VARCHAR" property="orgId"/>
+        <result column="ORG_NAME" jdbcType="VARCHAR" property="orgName"/>
+        <result column="DATABASE_NAME" jdbcType="VARCHAR" property="databaseName"/>
+        <result column="DATABASE_TYPE" jdbcType="VARCHAR" property="databaseType"/>
+        <result column="TABLE_NAME" jdbcType="VARCHAR" property="tableName"/>
+        <result column="forwardedFrom" jdbcType="VARCHAR" property="forwardedFrom"/>
+        <result column="department" jdbcType="VARCHAR" property="department"/>
+        <result column="emailSubject" jdbcType="VARCHAR" property="emailSubject"/>
+        <result column="sendTime" jdbcType="TIMESTAMP" property="sendTime"/>
+        <result column="MD5_VALUE" jdbcType="VARCHAR" property="md5Value"/>
+        <result column="IS_ENCRYPT" jdbcType="DECIMAL" property="isEncrypt"/>
+        <result column="ALGORITHM_TYPE" jdbcType="VARCHAR" property="algorithmType"/>
+        <result column="TASK_TYPE" jdbcType="VARCHAR" property="taskType"/>
+    </resultMap>
+
+    <select id="queryDscvrFiles" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dto.pojo.system.DscvrFilesRsp">
+        SELECT
+        f.ID AS id,
+        f.JOB_NAME as jobName,
+        f.JOB_ID as jobId,
+        f.DATABASE_TYPE AS databaseType,
+        f.FILE_NAME AS fileName,
+        f.FILE_EXTENSION AS fileExtension,
+        f.FILE_PATH AS filePath,DATE_FORMAT(f.DETECT_DATE_TS , '%Y-%m-%d %H:%i:%s') AS detectDateTs,
+        f.IS_ENCRYPT AS isEncrypt,
+        f.ALGORITHM_TYPE AS algorithmType,
+        f.ORG_NAME AS orgName,
+        f.ORG_ID AS orgId,
+        f.TASK_TYPE AS taskType,
+        f.IP AS ip
+        FROM sp_dscvr_files f
+        WHERE 1 = 1
+        <if test="createdBy != null">
+            AND f.CREATED_BY = #{createdBy}
+        </if>
+        <if test="jobName != null">
+            AND f.JOB_NAME LIKE concat(concat("%",#{jobName}),"%")
+        </if>
+        <if test="jobId != null">
+            AND f.JOB_ID = #{jobId}
+        </if>
+        <if test="taskType != null">
+            AND f.TASK_TYPE = #{taskType}
+        </if>
+        <if test="fileName != null">
+            AND f.FILE_NAME LIKE concat(concat("%",#{fileName}),"%")
+        </if>
+        <if test="ip != null">
+            AND f.ip LIKE concat(concat("%",#{ip}),"%")
+        </if>
+        <if test="fileExtension != null">
+            AND f.FILE_EXTENSION LIKE concat(concat("%",#{fileExtension}),"%")
+        </if>
+        <if test="filePath != null">
+            AND f.FILE_PATH LIKE concat(concat("%",#{filePath}),"%")
+        </if>
+        <if test="isEncrypt != null">
+            AND f.IS_ENCRYPT = #{isEncrypt}
+        </if>
+        <if test="algorithmType != null">
+            AND f.ALGORITHM_TYPE = #{algorithmType}
+        </if>
+        <if test="detectDateTs_beginTime != null and detectDateTs_endTime != null">
+            AND f.DETECT_DATE_TS BETWEEN #{detectDateTs_beginTime} AND #{detectDateTs_endTime}
+        </if>
+        <if test="detectDateTs_beginTime != null and detectDateTs_endTime == null">
+            AND f.DETECT_DATE_TS &gt; #{detectDateTs_beginTime}
+        </if>
+        <if test="detectDateTs_beginTime == null and detectDateTs_endTime != null">
+            AND f.DETECT_DATE_TS &lt; #{detectDateTs_endTime}
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY f.DETECT_DATE_TS
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+
+    </select>
+
+    <select id="getDscvrFilesByBusiDataDto" parameterType="com.spinfosec.dto.pojo.system.ExportBusiDataDto"
+            resultType="com.spinfosec.dto.pojo.system.DscvrFilesRsp">
+        SELECT f.ID AS id,
+        f.JOB_NAME as jobName,
+        f.IP AS ip,
+        f.DATABASE_TYPE AS databaseType,
+        f.FILE_NAME AS fileName,
+        f.FILE_EXTENSION AS fileExtension,
+        f.FILE_PATH AS filePath,
+        DATE_FORMAT(f.DETECT_DATE_TS , '%Y-%m-%d %H:%i:%s') AS detectDateTs,
+        f.IS_ENCRYPT AS isEncrypt,
+        f.ALGORITHM_TYPE AS algorithmType,
+        f.ORG_NAME AS orgName,f.ORG_ID AS orgId,
+        f.TASK_TYPE AS taskType
+        FROM
+        sp_dscvr_files f
+        WHERE 1 =1
+        <if test="createdBy != null and createdBy != ''">
+            AND f.CREATED_BY = #{createdBy}
+        </if>
+        <if test="jobId != null and jobId != ''">
+            AND f.JOB_ID = #{jobId}
+        </if>
+        <if test="jobName != null and jobName != ''">
+            AND f.JOB_NAME LIKE concat(concat("%",#{jobName}),"%")
+        </if>
+        <if test="taskType != null and taskType != ''">
+            AND f.TASK_TYPE = #{taskType}
+        </if>
+        <if test="fileName != null and fileName != ''">
+            AND f.FILE_NAME LIKE concat(concat("%",#{fileName}),"%")
+        </if>
+        <if test="ip != null and ip != ''">
+            AND f.ip LIKE concat(concat("%",#{ip}),"%")
+        </if>
+        <if test="fileExtension != null and  fileExtension != ''">
+            AND f.FILE_EXTENSION LIKE concat(concat("%",#{fileExtension}),"%")
+        </if>
+        <if test="filePath != null and filePath != ''">
+            AND f.FILE_PATH LIKE concat(concat("%",#{filePath}),"%")
+        </if>
+        <if test="isEncrypt != null and isEncrypt !=''">
+            AND f.IS_ENCRYPT = #{isEncrypt}
+        </if>
+        <if test="algorithmType != null and algorithmType != ''">
+            AND f.ALGORITHM_TYPE LIKE concat(concat("%",#{algorithmType}),"%")
+        </if>
+        <if test="algorithmType == ''">
+            AND f.ALGORITHM_TYPE = ""
+        </if>
+        <if test="detectDateTs_beginTime != null and detectDateTs_beginTime != '' and detectDateTs_endTime != null and detectDateTs_endTime !=''">
+            AND f.DETECT_DATE_TS BETWEEN #{detectDateTs_beginTime} AND #{detectDateTs_endTime}
+        </if>
+        <if test="detectDateTs_beginTime != null and detectDateTs_beginTime != '' and detectDateTs_endTime == null">
+            AND f.DETECT_DATE_TS &gt; #{detectDateTs_beginTime}
+        </if>
+        <if test="detectDateTs_beginTime == null and detectDateTs_endTime != null and detectDateTs_endTime != ''">
+            AND f.DETECT_DATE_TS &lt; #{detectDateTs_endTime}
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY f.DETECT_DATE_TS
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+
+    </select>
+
+    <select id="queryDscvrFilesById" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dto.pojo.system.DscvrFilesRsp">
+        SELECT f.ID AS id,f.JOB_NAME as jobName,f.DATABASE_TYPE AS databaseType,f.FILE_NAME AS fileName,
+        f.FILE_EXTENSION AS fileExtension,f.FILE_PATH AS filePath,DATE_FORMAT(f.DETECT_DATE_TS , '%Y-%m-%d %H:%i:%s') AS detectDateTs,
+        f.IS_ENCRYPT AS isEncrypt,f.ALGORITHM_TYPE AS algorithmType,f.ORG_NAME AS orgName,f.ORG_ID AS orgId
+        FROM  sp_dscvr_files f WHERE f.ID = #{id}
+    </select>
+
+    <insert id="saveDscvrFiles" parameterType="com.spinfosec.dao.entity.SpDscvrFiles">
+        INSERT INTO sp_dscvr_files (ID, INC_EXTERNAL_ID, JOB_ID,
+      JOB_NAME, INSERT_DATE, IS_AUTHORIZED,
+      DETECT_DATE_TS, DETECT_DATE_TZ, LOCAL_DETECT_TS,
+      LOCAL_DETECT_TZ, FILE_NAME, HOST_NAME,
+      IP, MAC, FILE_SIZE,
+      FDATE_ACCESSED_TS, FDATE_ACCESSED_TZ, FDATE_CREATED_TS,
+      FDATE_CREATED_TZ, FDATE_MODIFIED_TS, FDATE_MODIFIED_TZ,
+      ORG_ID, ORG_NAME, DATABASE_NAME,
+      DATABASE_TYPE, TABLE_NAME, forwardedFrom,
+      department, emailSubject, sendTime,
+      MD5_VALUE, IS_ENCRYPT, ALGORITHM_TYPE,
+      CREATED_BY, TASK_TYPE, FILE_PATH,
+      FILE_EXTENSION, inetSendTo, inetCopyTo)
+    VALUES (#{id,jdbcType=VARCHAR}, #{incExternalId,jdbcType=VARCHAR}, #{jobId,jdbcType=VARCHAR},
+      #{jobName,jdbcType=VARCHAR}, #{insertDate,jdbcType=TIMESTAMP}, #{isAuthorized,jdbcType=DECIMAL},
+      #{detectDateTs,jdbcType=TIMESTAMP}, #{detectDateTz,jdbcType=VARCHAR}, #{localDetectTs,jdbcType=TIMESTAMP},
+      #{localDetectTz,jdbcType=VARCHAR}, #{fileName,jdbcType=VARCHAR}, #{hostName,jdbcType=VARCHAR},
+      #{ip,jdbcType=VARCHAR}, #{mac,jdbcType=VARCHAR}, #{fileSize,jdbcType=DECIMAL},
+      #{fdateAccessedTs,jdbcType=TIMESTAMP}, #{fdateAccessedTz,jdbcType=VARCHAR}, #{fdateCreatedTs,jdbcType=TIMESTAMP},
+      #{fdateCreatedTz,jdbcType=VARCHAR}, #{fdateModifiedTs,jdbcType=TIMESTAMP}, #{fdateModifiedTz,jdbcType=VARCHAR},
+      #{orgId,jdbcType=VARCHAR}, #{orgName,jdbcType=VARCHAR}, #{databaseName,jdbcType=VARCHAR},
+      #{databaseType,jdbcType=VARCHAR}, #{tableName,jdbcType=VARCHAR}, #{forwardedFrom,jdbcType=VARCHAR},
+      #{department,jdbcType=VARCHAR}, #{emailSubject,jdbcType=VARCHAR}, #{sendTime,jdbcType=TIMESTAMP},
+      #{md5Value,jdbcType=VARCHAR}, #{isEncrypt,jdbcType=DECIMAL}, #{algorithmType,jdbcType=VARCHAR},
+      #{createdBy,jdbcType=VARCHAR}, #{taskType,jdbcType=VARCHAR}, #{filePath,jdbcType=LONGVARCHAR},
+      #{fileExtension,jdbcType=LONGVARCHAR}, #{inetSendTo,jdbcType=LONGVARCHAR}, #{inetCopyTo,jdbcType=LONGVARCHAR})
+    </insert>
+
+    <update id="updateDscvrFiles" parameterType="com.spinfosec.dao.entity.SpDscvrFiles">
+        update sp_dscvr_files
+        <set>
+            <if test="incExternalId != null">
+                INC_EXTERNAL_ID = #{incExternalId,jdbcType=VARCHAR},
+            </if>
+            <if test="jobId != null">
+                JOB_ID = #{jobId,jdbcType=VARCHAR},
+            </if>
+            <if test="jobName != null">
+                JOB_NAME = #{jobName,jdbcType=VARCHAR},
+            </if>
+            <if test="insertDate != null">
+                INSERT_DATE = #{insertDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isAuthorized != null">
+                IS_AUTHORIZED = #{isAuthorized,jdbcType=DECIMAL},
+            </if>
+            <if test="detectDateTs != null">
+                DETECT_DATE_TS = #{detectDateTs,jdbcType=TIMESTAMP},
+            </if>
+            <if test="detectDateTz != null">
+                DETECT_DATE_TZ = #{detectDateTz,jdbcType=VARCHAR},
+            </if>
+            <if test="localDetectTs != null">
+                LOCAL_DETECT_TS = #{localDetectTs,jdbcType=TIMESTAMP},
+            </if>
+            <if test="localDetectTz != null">
+                LOCAL_DETECT_TZ = #{localDetectTz,jdbcType=VARCHAR},
+            </if>
+            <if test="fileName != null">
+                FILE_NAME = #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="fileExtension != null">
+                FILE_EXTENSION = #{fileExtension,jdbcType=VARCHAR},
+            </if>
+            <if test="hostName != null">
+                HOST_NAME = #{hostName,jdbcType=VARCHAR},
+            </if>
+            <if test="ip != null">
+                IP = #{ip,jdbcType=VARCHAR},
+            </if>
+            <if test="mac != null">
+                MAC = #{mac,jdbcType=VARCHAR},
+            </if>
+            <if test="fileSize != null">
+                FILE_SIZE = #{fileSize,jdbcType=DECIMAL},
+            </if>
+            <if test="fdateAccessedTs != null">
+                FDATE_ACCESSED_TS = #{fdateAccessedTs,jdbcType=TIMESTAMP},
+            </if>
+            <if test="fdateAccessedTz != null">
+                FDATE_ACCESSED_TZ = #{fdateAccessedTz,jdbcType=VARCHAR},
+            </if>
+            <if test="fdateCreatedTs != null">
+                FDATE_CREATED_TS = #{fdateCreatedTs,jdbcType=TIMESTAMP},
+            </if>
+            <if test="fdateCreatedTz != null">
+                FDATE_CREATED_TZ = #{fdateCreatedTz,jdbcType=VARCHAR},
+            </if>
+            <if test="fdateModifiedTs != null">
+                FDATE_MODIFIED_TS = #{fdateModifiedTs,jdbcType=TIMESTAMP},
+            </if>
+            <if test="fdateModifiedTz != null">
+                FDATE_MODIFIED_TZ = #{fdateModifiedTz,jdbcType=VARCHAR},
+            </if>
+            <if test="orgId != null">
+                ORG_ID = #{orgId,jdbcType=VARCHAR},
+            </if>
+            <if test="orgName != null">
+                ORG_NAME = #{orgName,jdbcType=VARCHAR},
+            </if>
+            <if test="databaseName != null">
+                DATABASE_NAME = #{databaseName,jdbcType=VARCHAR},
+            </if>
+            <if test="databaseType != null">
+                DATABASE_TYPE = #{databaseType,jdbcType=VARCHAR},
+            </if>
+            <if test="tableName != null">
+                TABLE_NAME = #{tableName,jdbcType=VARCHAR},
+            </if>
+            <if test="forwardedFrom != null">
+                forwardedFrom = #{forwardedFrom,jdbcType=VARCHAR},
+            </if>
+            <if test="department != null">
+                department = #{department,jdbcType=VARCHAR},
+            </if>
+            <if test="emailSubject != null">
+                emailSubject = #{emailSubject,jdbcType=VARCHAR},
+            </if>
+            <if test="sendTime != null">
+                sendTime = #{sendTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="md5Value != null">
+                MD5_VALUE = #{md5Value,jdbcType=VARCHAR},
+            </if>
+            <if test="isEncrypt != null">
+                IS_ENCRYPT = #{isEncrypt,jdbcType=DECIMAL},
+            </if>
+            <if test="algorithmType != null">
+                ALGORITHM_TYPE = #{algorithmType,jdbcType=VARCHAR},
+            </if>
+            <if test="filePath != null">
+                FILE_PATH = #{filePath,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="inetSendTo != null">
+                inetSendTo = #{inetSendTo,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="inetCopyTo != null">
+                inetCopyTo = #{inetCopyTo,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteDscvrFilesById" parameterType="java.lang.String">
+        DELETE FROM sp_dscvr_files
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="countEventByCondition" parameterType="java.util.HashMap" resultType="java.lang.Long">
+        SELECT
+            count(id)
+        FROM
+            sp_dscvr_files
+        WHERE
+        DETECT_DATE_TS BETWEEN #{start} AND #{end}
+        <if test="createdBy != null">
+           AND  CREATED_BY = #{createdBy}
+        </if>
+    </select>
+
+    <delete id="deleteEventByCondition" parameterType="java.util.HashMap">
+        DELETE FROM sp_dscvr_files WHERE  detect_date_ts BETWEEN #{start} AND #{end}
+    </delete>
+
+    <select id="getReportWordByTaskId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dto.pojo.system.ReportWordData">
+        SELECT
+        t.ID AS id,
+        t.name AS name,
+        tar.IP AS targetIp,
+        dis.CHECK_DATE AS checkDate,
+        dis.BE_CHECKED_ORG_ID AS beCheckOrgId,
+        dis.CHECK_ORG_NAME AS checkOrgName,
+        o.NAME AS beCheckOrgName,
+        t.totalCount AS checkNum
+        FROM sp_discovery_tasks dis
+        LEFT JOIN sp_task t ON t.jobId = dis.ID
+        LEFT JOIN sp_org_unit_dict o ON o.ID = dis.BE_CHECKED_ORG_ID
+        LEFT JOIN sp_target_res tar ON tar.id = dis.TARGET_ID WHERE dis.ID = #{jobId} ORDER BY t.startTime DESC
+    </select>
+
+    <select id="getCiphertextNum" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM
+        sp_dscvr_files  f
+        WHERE IS_ENCRYPT = '1'  /*0.否 1.是 2 未知*/
+        AND f.JOB_ID  = #{jobId}
+    </select>
+
+    <select id="getPlaintextNumNum" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM
+        sp_dscvr_files  f
+        WHERE IS_ENCRYPT IN ('0')  /*0.否 1.是 2 未知*/
+        AND f.JOB_ID  = #{jobId}
+    </select>
+
+    <select id="getBusinessPassNum" parameterType="java.lang.String" resultType="java.lang.Long">
+         SELECT COUNT(*)
+         FROM
+         sp_dscvr_files  f
+        WHERE
+        IS_ENCRYPT = '1'
+        AND ALGORITHM_TYPE NOT IN ('AES','Camellia','DES','DESede','未知') /* 目前未知、AES、Camellia、DES、DESede均为非商用密码算法 */
+        AND f.JOB_ID = #{jobId}
+  </select>
+
+    <select id="getUnBusinessPassNum" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM
+        sp_dscvr_files  f
+        WHERE
+        IS_ENCRYPT = '1'
+        AND ALGORITHM_TYPE IN ('AES','Camellia','DES','DESede','未知') /* 目前未知、AES、Camellia、DES、DESede均为非商用密码算法 */
+        AND f.JOB_ID  = #{jobId}
+    </select>
+
+    <select id="getAlgorithmScale" parameterType="java.lang.String" resultType="java.util.LinkedHashMap">
+        SELECT ALGORITHM_TYPE,COUNT(ALGORITHM_TYPE) FROM sp_dscvr_files WHERE ALGORITHM_TYPE IS NOT NULL
+        <if test="userId  != null and userId != ''">
+            AND CREATED_BY = #{userId}
+        </if>
+        <if test="period  == 'DAY'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 1 DAY) AND NOW()
+        </if>
+        <if test="period  == 'WEEK'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 7 DAY) AND NOW()
+        </if>
+        <if test="period  == 'MONTH'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 1 MONTH) AND NOW()
+        </if>
+        <if test="period  == 'YEAR'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 1 YEAR) AND NOW()
+        </if>
+        GROUP BY ALGORITHM_TYPE /* 按时间周期获取事件加密算法类型比例 */
+    </select>
+
+    <select id="getIsEncrypScale" parameterType="java.lang.String" resultType="java.util.LinkedHashMap">
+        SELECT IS_ENCRYPT,COUNT(IS_ENCRYPT) FROM sp_dscvr_files WHERE 1 = 1
+        <if test="userId  != null and userId != ''">
+            AND CREATED_BY = #{userId}
+        </if>
+        <if test="period  == 'DAY'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 1 DAY) AND NOW()
+        </if>
+        <if test="period  == 'WEEK'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 7 DAY) AND NOW()
+        </if>
+        <if test="period  == 'MONTH'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 1 MONTH) AND NOW()
+        </if>
+        <if test="period  == 'YEAR'.toString()">
+            AND DETECT_DATE_TS BETWEEN DATE_SUB(NOW(),INTERVAL 1 YEAR) AND NOW()
+        </if>
+        GROUP BY IS_ENCRYPT /* 按时间周期获取事件 加密或未加密文件数量 */
+    </select>
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.TrustHostDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpAdminHostSetting">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="HOST_IP" jdbcType="VARCHAR" property="hostIp"/>
+        <result column="HOST_MAC" jdbcType="VARCHAR" property="hostMac"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    ID, NAME, HOST_IP, HOST_MAC, CREATED_BY, CREATE_DATE, DESCRIPTION
+  </sql>
+
+    <select id="querByPage" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dto.pojo.system.TrustHostBean">
+        SELECT
+        h.ID AS id, h.NAME AS name, h.HOST_IP AS hostIp, h.HOST_MAC AS hostMac,
+        DATE_FORMAT(h.CREATE_DATE, '%Y-%m-%d %H:%i:%s') AS createTime,
+        h.DESCRIPTION AS description,a.ID AS userCreateId, a.USERNAME AS userCreateName,r.ID AS
+        roleCreateId,r.NAME AS roleCreateName
+        FROM
+        sp_admin_host_setting h
+        LEFT JOIN sp_admins a ON a.ID = h.CREATED_BY
+        LEFT JOIN sp_role_admin_relation ra ON a.ID = ra.ADMIN_ID
+        LEFT JOIN sp_roles r ON ra.ROLE_ID = r.ID
+        WHERE 1 = 1
+        <if test="createdBy != null">
+            AND h.CREATED_BY = #{createdBy}
+        </if>
+        <if test="name != null">
+            AND h.NAME Like concat(concat("%",#{name}),"%")
+        </if>
+        <if test="hostIp != null">
+            AND h.HOST_IP Like concat(concat("%",#{hostIp}),"%")
+        </if>
+        <if test="description != null">
+            AND h.DESCRIPTION Like concat(concat("%",#{description}),"%")
+        </if>
+        <if test="userCreateName != null">
+            AND a.USERNAME Like concat(concat("%",#{userCreateName}),"%")
+        </if>
+        <if test="roleCreateName != null">
+            AND r.NAME Like concat(concat("%",#{roleCreateName}),"%")
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY h.NAME
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="getAllSecHost" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpAdminHostSetting">
+        SELECT
+        h.ID AS id,
+        h.NAME AS name,
+        h.HOST_IP AS hostIp,
+        h.HOST_MAC AS hostMac,
+        h.CREATED_BY AS createdBy,
+        DATE_FORMAT(h.CREATE_DATE, '%Y-%m-%d %H:%i:%s') AS createDate,
+        h.DESCRIPTION AS description
+        FROM
+        sp_admin_host_setting h
+        WHERE  h.CREATED_BY =#{userId};
+    </select>
+
+    <select id="getHostSettingById" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpAdminHostSetting">
+        SELECT
+         h.ID AS id, h.NAME AS name, h.HOST_IP AS hostIp, h.HOST_MAC AS hostMac,
+        h.CREATED_BY AS createdBy,
+        DATE_FORMAT(h.CREATE_DATE, '%Y-%m-%d %H:%i:%s') AS createDate,
+        h.DESCRIPTION AS description
+        FROM sp_admin_host_setting h
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <delete id="deleteHostSecById" parameterType="java.lang.String">
+    DELETE FROM sp_admin_host_setting
+    where ID = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="saveHostSec" parameterType="com.spinfosec.dao.entity.SpAdminHostSetting">
+    INSERT INTO sp_admin_host_setting (ID, NAME, HOST_IP,
+      HOST_MAC, CREATED_BY, CREATE_DATE, 
+      DESCRIPTION)
+    VALUES (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{hostIp,jdbcType=VARCHAR},
+      #{hostMac,jdbcType=VARCHAR}, #{createdBy,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, 
+      #{description,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateHostSec" parameterType="com.spinfosec.dao.entity.SpAdminHostSetting">
+    UPDATE sp_admin_host_setting
+        <set>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="hostIp != null">
+                HOST_IP = #{hostIp,jdbcType=VARCHAR},
+            </if>
+            <if test="hostMac != null">
+                HOST_MAC = #{hostMac,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                CREATED_BY = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="description != null">
+                DESCRIPTION = #{description,jdbcType=VARCHAR},
+            </if>
+        </set>
+    WHERE ID = #{id,jdbcType=VARCHAR}
+  </update>
+
+    <delete id="deldeteAdminTrustHostByHostId" parameterType="java.lang.String">
+        DELETE FROM sp_admin_trust_host WHERE HOST_ID = #{id}
+    </delete>
+</mapper>

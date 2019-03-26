@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.tactic.DiscoveryTasksDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpDiscoveryTasks">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <id column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="DISCOVERY_TASK_TYPE" jdbcType="VARCHAR" property="discoveryTaskType"/>
+        <result column="ELEMENT_STATUS" jdbcType="VARCHAR" property="elementStatus"/>
+        <result column="TARGET_ID" jdbcType="VARCHAR" property="targetId"/>
+        <result column="SCHEDULING_ID" jdbcType="VARCHAR" property="schedulingId"/>
+        <result column="IS_FILE_NAME_ENABLED" jdbcType="DECIMAL" property="isFileNameEnabled"/>
+        <result column="IS_FILE_AGE_ENABLED" jdbcType="DECIMAL" property="isFileAgeEnabled"/>
+        <result column="SCAN_PERIOD_TYPE" jdbcType="VARCHAR" property="scanPeriodType"/>
+        <result column="MODIFIED_WITHIN_MONTHS" jdbcType="DECIMAL" property="modifiedWithinMonths"/>
+        <result column="MODIFIED_MONTHS_AGO" jdbcType="DECIMAL" property="modifiedMonthsAgo"/>
+        <result column="MODIFIED_FROM_DATE" jdbcType="TIMESTAMP" property="modifiedFromDate"/>
+        <result column="MODIFIED_TO_DATE" jdbcType="TIMESTAMP" property="modifiedToDate"/>
+        <result column="IS_LARGER_THAN_ENABLED" jdbcType="DECIMAL" property="isLargerThanEnabled"/>
+        <result column="SIZE_LARGER_THAN" jdbcType="DECIMAL" property="sizeLargerThan"/>
+        <result column="IS_SMALLER_THAN_ENALBED" jdbcType="DECIMAL" property="isSmallerThanEnalbed"/>
+        <result column="SIZE_SMALLER_THAN" jdbcType="DECIMAL" property="sizeSmallerThan"/>
+        <result column="DEFINITION_TYPE" jdbcType="VARCHAR" property="definitionType"/>
+        <result column="OCR_ENABLED" jdbcType="DECIMAL" property="ocrEnabled"/>
+        <result column="IS_CPU_LIMIT_ENABLED" jdbcType="DECIMAL" property="isCpuLimitEnabled"/>
+        <result column="CPU_LIMIT_VALUE" jdbcType="DECIMAL" property="cpuLimitValue"/>
+        <result column="BUSY_BANDWIDTH_STARTDATE" jdbcType="TIMESTAMP" property="busyBandwidthStartdate"/>
+        <result column="BUSY_BANDWIDTH_ENDDATE" jdbcType="TIMESTAMP" property="busyBandwidthEnddate"/>
+        <result column="BUSY_BANDWIDTH_ENABLED" jdbcType="DECIMAL" property="busyBandwidthEnabled"/>
+        <result column="BUSY_BANDWIDTH_LIMIT" jdbcType="VARCHAR" property="busyBandwidthLimit"/>
+        <result column="PERCENT_ENABLED" jdbcType="DECIMAL" property="percentEnabled"/>
+        <result column="PERCENT_AGE" jdbcType="VARCHAR" property="percentAge"/>
+        <result column="TIMER_ENABLED" jdbcType="DECIMAL" property="timerEnabled"/>
+        <result column="TIMER_AGE" jdbcType="VARCHAR" property="timerAge"/>
+        <result column="BE_CHECKED_ORG_ID" jdbcType="VARCHAR" property="beCheckedOrgId"/>
+        <result column="CHECK_ORG_NAME" jdbcType="VARCHAR" property="checkOrgName"/>
+        <result column="CHECK_USER" jdbcType="VARCHAR" property="checkUser"/>
+        <result column="CHECK_DATE" jdbcType="VARCHAR" property="checkDate"/>
+        <result column="OCR_PREPROCESS" jdbcType="DECIMAL" property="ocrPreprocess"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+    </resultMap>
+
+    <insert id="saveColumnResInfos" parameterType="com.spinfosec.dao.entity.SpColumnResInfo">
+        insert into sp_column_resinfo (ID, TABLENAME, COLUMNNAME,
+        IP, TYPE, KEYTYPE,
+        USERNAME, PATH, DOMAIN,
+        PORT, PUBLICKEYNAME, TARGET_RES_ID,
+        COLLECTION_POLICY_ID, PATH_REALATIVE_ABSOLUTE,
+        FLAG_COLUMN2, PASSWORD, PUBLICKEY)
+        values (#{id,jdbcType=VARCHAR}, #{tableName,jdbcType=VARCHAR}, #{columnName,jdbcType=VARCHAR},
+        #{ip,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{keyType,jdbcType=VARCHAR},
+        #{username,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, #{domain,jdbcType=VARCHAR},
+        #{port,jdbcType=VARCHAR}, #{publicKeyName,jdbcType=VARCHAR}, #{targetResId,jdbcType=VARCHAR},
+        #{collectionPolicyId,jdbcType=VARCHAR}, #{pathRelaBType,jdbcType=VARCHAR},
+        #{flagColumn2,jdbcType=VARCHAR}, #{password,jdbcType=LONGVARCHAR}, #{publickey,jdbcType=LONGVARCHAR}
+        )
+    </insert>
+
+    <delete id="deleteColumnResInfos" parameterType="java.lang.String">
+        DELETE FROM  sp_column_resinfo WHERE TARGET_RES_ID = #{targetId}
+    </delete>
+
+    <select id="getColumnsByTargetIdAndTableName" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpColumnResInfo">
+        SELECT
+         ID AS id,
+        TABLENAME AS tableName,
+        COLUMNNAME AS columnName,
+        IP AS ip,
+        TYPE AS type,
+        KEYTYPE AS keyType,
+        USERNAME AS username,
+        PASSWORD AS password,
+        PATH AS path,
+        DOMAIN AS domain,
+        PUBLICKEY AS publickey,
+        PORT AS port,
+        PUBLICKEYNAME AS publicKeyName,
+        TARGET_RES_ID AS targetResId,
+        COLLECTION_POLICY_ID AS collectionPolicyId,
+        PATH_REALATIVE_ABSOLUTE AS pathRelaBType,
+        FLAG_COLUMN2 AS flagColumn2
+        FROM sp_column_resinfo WHERE TARGET_RES_ID = #{targetId} AND TABLENAME = #{tableName}
+    </select>
+
+    <select id="getColumnResInfosByTargetId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpColumnResInfo">
+        SELECT
+        ID AS id,
+        TABLENAME AS tableName,
+        COLUMNNAME AS columnName,
+        IP AS ip,
+        TYPE AS type,
+        KEYTYPE AS keyType,
+        USERNAME AS username,
+        PASSWORD AS password,
+        PATH AS path,
+        DOMAIN AS domain,
+        PUBLICKEY AS publickey,
+        PORT AS port,
+        PUBLICKEYNAME AS publicKeyName,
+        TARGET_RES_ID AS targetResId,
+        COLLECTION_POLICY_ID AS collectionPolicyId,
+        PATH_REALATIVE_ABSOLUTE AS pathRelaBType,
+        FLAG_COLUMN2 AS flagColumn2
+        FROM sp_column_resinfo WHERE TARGET_RES_ID = #{targetId}
+    </select>
+
+    <insert id="saveTargetRes" parameterType="com.spinfosec.dao.entity.SpTargetRes">
+      INSERT INTO sp_target_res (ID, IP, FQDN,
+      RES_TYPE, SITE, SERVER_ADDRESS,
+      DATABASE_TYPE, DATABASE_VERSION, PORT,
+      DATABASE_NAME, SCHEMA_NAME, USERNAME,
+      PASSWORD, SHARE_USERNAME, SHARE_PASSWORD,
+      VMDK_PATH, DOMAIN, SID,
+      IS_SCAN_ATTACHMENT, IS_SSL, CREATE_DATE,
+      CREATED_BY, LAST_MODIFY_DATE, LOTUS_SERVER_TYPE,
+      EXCHANGE_EDITION, PASSWORD_TYPE, KEY_TYPE,
+      PUBLIC_KEY_NAME, PUBLIC_KEY)
+    VALUES (#{id,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, #{fqdn,jdbcType=VARCHAR},
+      #{resType,jdbcType=VARCHAR}, #{site,jdbcType=VARCHAR}, #{serverAddress,jdbcType=VARCHAR},
+      #{databaseType,jdbcType=VARCHAR}, #{databaseVersion,jdbcType=VARCHAR}, #{port,jdbcType=VARCHAR},
+      #{databaseName,jdbcType=VARCHAR}, #{schemaName,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR},
+      #{password,jdbcType=VARCHAR}, #{shareUsername,jdbcType=VARCHAR}, #{sharePassword,jdbcType=VARCHAR},
+      #{vmdkPath,jdbcType=VARCHAR}, #{domain,jdbcType=VARCHAR}, #{sid,jdbcType=VARCHAR},
+      #{isScanAttachment,jdbcType=VARCHAR}, #{isSsl,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP},
+      #{createdBy,jdbcType=VARCHAR}, #{lastModifyDate,jdbcType=TIMESTAMP}, #{lotusServerType,jdbcType=VARCHAR},
+      #{exchangeEdition,jdbcType=VARCHAR}, #{passwordType,jdbcType=VARCHAR}, #{keyType,jdbcType=VARCHAR},
+      #{publicKeyName,jdbcType=VARCHAR}, #{publicKey,jdbcType=LONGVARCHAR})
+    </insert>
+
+    <insert id="saveTargetResDetail" parameterType="com.spinfosec.dao.entity.SpTargetResDetail">
+     INSERT INTO  sp_target_res_detail (ID, TARGET_RES_ID, NAME,
+          PATH, DISPLAY_PATH, FILE_FOLDER_TYPE,
+          FILE_SIZE, MODIFY_DATE_TS, MODIFY_DATE_TZ,
+          DATABASE_NAME, IS_SCAN_ALL_ON_DATABASE)
+        VALUES (#{id,jdbcType=VARCHAR}, #{targetResId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+          #{path,jdbcType=VARCHAR}, #{displayPath,jdbcType=VARCHAR}, #{fileFolderType,jdbcType=VARCHAR},
+          #{fileSize,jdbcType=VARCHAR}, #{modifyDateTs,jdbcType=VARCHAR}, #{modifyDateTz,jdbcType=VARCHAR},
+          #{databaseName,jdbcType=VARCHAR}, #{isScanAllOnDatabase,jdbcType=VARCHAR})
+    </insert>
+
+    <insert id="saveSpSchedulingData" parameterType="com.spinfosec.dao.entity.SpSchedulingData">
+      INSERT INTO sp_scheduling_data (ID, START_DATE, END_DATE,
+      END_DATE_TYPE, IS_DURATION_LIMIT, DURATION_VALUE,
+      FREQUENCY_TYPE, SCHEDULEDAYS, RECUR_DATES,
+      CONTINUOUS_STOP_INTERVAL, USE_INITIAL_RECUR
+      )
+      VALUES (#{id,jdbcType=VARCHAR}, #{startDate,jdbcType=TIMESTAMP}, #{endDate,jdbcType=TIMESTAMP},
+      #{endDateType,jdbcType=VARCHAR}, #{isDurationLimit,jdbcType=DECIMAL}, #{durationValue,jdbcType=DECIMAL},
+      #{frequencyType,jdbcType=VARCHAR}, #{scheduledays,jdbcType=VARCHAR}, #{recurDates,jdbcType=VARCHAR},
+      #{continuousStopInterval,jdbcType=DECIMAL}, #{useInitialRecur,jdbcType=DECIMAL}
+      )
+    </insert>
+
+    <insert id="saveSpDscvrExcldFileTypes" parameterType="com.spinfosec.dao.entity.SpDscvrExcldFileTypes">
+    INSERT  INTO sp_dscvr_excld_file_types
+         (ID, DISCOVERY_TASK_ID, ELEMENT_INDEX, FILE_PROPERTY_ID, FILE_TYPE)
+    VALUES (#{id,jdbcType=VARCHAR}, #{discoveryTaskId,jdbcType=VARCHAR}, #{elementIndex,jdbcType=DECIMAL},
+      #{filePropertyId,jdbcType=VARCHAR}, #{fileType,jdbcType=LONGVARCHAR})
+    </insert>
+
+    <insert id="saveSpDscvrIncldFileTypes" parameterType="com.spinfosec.dao.entity.SpDscvrIncldFileTypes">
+      INSERT  INTO sp_dscvr_incld_file_types
+         (ID, DISCOVERY_TASK_ID, ELEMENT_INDEX, FILE_PROPERTY_ID, FILE_TYPE)
+    VALUES (#{id,jdbcType=VARCHAR}, #{discoveryTaskId,jdbcType=VARCHAR}, #{elementIndex,jdbcType=DECIMAL},
+      #{filePropertyId,jdbcType=VARCHAR}, #{fileType,jdbcType=LONGVARCHAR})
+    </insert>
+
+    <insert id="saveSpDayTimeframe" parameterType="com.spinfosec.dao.entity.SpDayTimeframe">
+        INSERT INTO sp_day_timeframe (ID,DAY_OF_WEEK)
+        VALUES (#{id,jdbcType=VARCHAR},#{dayOfWeek,jdbcType=VARCHAR})
+    </insert>
+
+    <insert id="saveSpSchedulingDayTf" parameterType="com.spinfosec.dao.entity.SpSchedulingDayTf">
+        INSERT INTO sp_scheduling_day_tf (ID,DAY_TF_IDM,SCHEDULING_DATA_ID)
+        VALUES (#{id,jdbcType=VARCHAR},#{dayTfId,jdbcType=VARCHAR},#{schedulingDataId,jdbcType=VARCHAR})
+    </insert>
+
+    <insert id="saveSpDayTimeframeHours" parameterType="com.spinfosec.dao.entity.SpDayTimeframeHours">
+        INSERT INTO sp_day_timeframe_hours(ID,HOUR,DAY_TIMEFRAME_ID)
+        VALUES (#{id,jdbcType=VARCHAR},#{hour,jdbcType=VARCHAR},#{dayTimeframeId,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="getTargetResById" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpTargetRes">
+       SELECT ID AS id, IP AS ip, FQDN AS fqdn, RES_TYPE AS resType, SITE AS site, SERVER_ADDRESS AS serverAddress, DATABASE_TYPE AS databaseType,
+        DATABASE_VERSION AS databaseVersion, PORT AS port,
+        DATABASE_NAME AS databaseName, SCHEMA_NAME AS schemaName, USERNAME AS username , PASSWORD AS password,
+        SHARE_USERNAME AS shareUsername, SHARE_PASSWORD AS sharePassword, VMDK_PATH AS vmdkPath,
+        DOMAIN AS domain, SID AS sid, IS_SCAN_ATTACHMENT AS isScanAttachment, IS_SSL AS isSsl, CREATE_DATE AS createDate, CREATED_BY AS createdBy,
+        LAST_MODIFY_DATE AS lastModifyDate,LOTUS_SERVER_TYPE AS lotusServerType, EXCHANGE_EDITION AS exchangeEdition,
+        PASSWORD_TYPE AS passwordType, KEY_TYPE AS keyType,PUBLIC_KEY AS publicKey,PUBLIC_KEY_NAME AS publicKeyName
+        FROM sp_target_res
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getPublicKeyNameByName" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT PUBLIC_KEY_NAME FROM sp_target_res WHERE PUBLIC_KEY_NAME = #{name}
+    </select>
+
+    <select id="getTargetResDetailByTargetId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpTargetResDetail">
+    SELECT ID  AS id, TARGET_RES_ID AS targetResId, NAME AS name, PATH AS path, DISPLAY_PATH AS displayPath,
+    FILE_FOLDER_TYPE AS fileFolderType, FILE_SIZE AS fileSize, MODIFY_DATE_TS AS modifyDateTs,
+    MODIFY_DATE_TZ AS modifyDateTz, DATABASE_NAME AS databaseName, IS_SCAN_ALL_ON_DATABASE AS isScanAllOnDatabase
+     FROM sp_target_res_detail
+    WHERE TARGET_RES_ID = #{targetId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getExcldFileByDisId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpDscvrExcldFileTypes">
+      SELECT ID AS id,DISCOVERY_TASK_ID AS discoveryTaskId,FILE_TYPE AS fileType,FILE_PROPERTY_ID AS filePropertyId,
+      ELEMENT_INDEX AS elementIndex
+      FROM sp_dscvr_excld_file_types WHERE DISCOVERY_TASK_ID = #{discoveryTaskId}
+    </select>
+
+    <select id="getIncldFileByDisId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpDscvrIncldFileTypes">
+         SELECT ID AS id,DISCOVERY_TASK_ID AS discoveryTaskId,FILE_TYPE AS fileType,FILE_PROPERTY_ID AS filePropertyId,
+      ELEMENT_INDEX AS elementIndex
+      FROM sp_dscvr_incld_file_types WHERE DISCOVERY_TASK_ID = #{discoveryTaskId}
+    </select>
+
+    <select id="getSchedulingDataById" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpSchedulingData">
+      SELECT  ID AS id, START_DATE AS startDate, END_DATE AS  endDate, END_DATE_TYPE AS endDateType, IS_DURATION_LIMIT AS isDurationLimit,
+      DURATION_VALUE AS durationValue, FREQUENCY_TYPE AS frequencyType,
+    SCHEDULEDAYS AS scheduledays, RECUR_DATES AS recurDates, CONTINUOUS_STOP_INTERVAL AS continuousStopInterval, USE_INITIAL_RECUR AS useInitialRecur
+    FROM sp_scheduling_data WHERE ID = #{id}
+    </select>
+
+    <select id="getAlgorithmFileTypeByDisId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpAlgorithmFileType">
+        SELECT
+        ID AS id,
+        ALGORITHM_ID AS algorithmId,
+        FILE_TYPE AS fileType,
+        JOB_ID AS jobId
+        FROM sp_algorithm_file_type WHERE JOB_ID =  #{disId}
+    </select>
+
+    <delete id="deleteSchedulingDataById" parameterType="java.lang.String">
+        DELETE FROM sp_scheduling_data WHERE ID = #{id}
+    </delete>
+
+    <select id="getDayTfByschedulingDataId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpSchedulingDayTf">
+        SELECT ID AS id,DAY_TF_ID AS dayTfId,SCHEDULING_DATA_ID AS schedulingDataId FROM  sp_scheduling_day_tf
+        WHERE SCHEDULING_DATA_ID = #{schedulingDataId}
+    </select>
+
+    <delete id="deleteDayTfById" parameterType="java.lang.String">
+        DELETE FROM sp_scheduling_day_tf WHERE ID = #{id}
+    </delete>
+
+    <select id="getDayTimeframeById" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpDayTimeframe">
+        SELECT ID AS  id,DAY_OF_WEEK AS  dayOfWeek FROM sp_day_timeframe WHERE ID = #{id}
+    </select>
+
+    <delete id="deleteDayTimeframeById" parameterType="java.lang.String">
+       DELETE FROM sp_day_timeframe  WHERE ID = #{id}
+    </delete>
+
+    <select id="getDayTimeframeHoursBydayTimeframeId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpDayTimeframeHours">
+         SELECT ID AS id,HOUR AS hour,DAY_TIMEFRAME_ID AS dayTimeframeId FROM sp_day_timeframe_hours
+         WHERE DAY_TIMEFRAME_ID = #{dayTimeframeId};
+    </select>
+
+    <delete id="deleteSpDayTimeframeHoursBydayTimeframeId" parameterType="java.lang.String">
+        DELETE FROM sp_day_timeframe_hours  WHERE DAY_TIMEFRAME_ID = #{dayTimeframeId};
+    </delete>
+
+    <delete id="deleteTargetResById" parameterType="java.lang.String">
+        DELETE FROM sp_target_res
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <delete id="deleteTargetResDetailByTargetId" parameterType="java.lang.String">
+      DELETE FROM  sp_target_res_detail
+      WHERE TARGET_RES_ID = #{targetId,jdbcType=VARCHAR}
+    </delete>
+
+    <delete id="deleteDiscoveryTaskById" parameterType="java.lang.String">
+        DELETE FROM  sp_discovery_tasks
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <delete id="deleteExcldFileTypesBydiscoveryTaskId" parameterType="java.lang.String">
+        DELETE FROM sp_dscvr_excld_file_types WHERE  DISCOVERY_TASK_ID = #{discoveryTaskId}
+    </delete>
+
+    <delete id="deleteIncldFileTypesBydiscoveryTaskId" parameterType="java.lang.String">
+        DELETE FROM sp_dscvr_incld_file_types WHERE  DISCOVERY_TASK_ID = #{discoveryTaskId}
+    </delete>
+
+    <delete id="deleteTaskInfoByDisId" parameterType="java.lang.String">
+         DELETE FROM sp_task WHERE jobId = #{disId}
+    </delete>
+
+    <delete id="deleteAlgorithmFileType" parameterType="java.lang.String">
+        DELETE FROM sp_algorithm_file_type WHERE JOB_ID = #{disId}
+    </delete>
+
+    <select id="getDiscoveryTaskById" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpDiscoveryTasks">
+        SELECT
+        ID AS id,
+        CREATE_DATE AS createDate,
+        NAME AS name,
+        DESCRIPTION AS description,
+        DISCOVERY_TASK_TYPE AS discoveryTaskType,
+        ELEMENT_STATUS AS elementStatus,
+        TARGET_ID AS targetId,
+        SCHEDULING_ID AS schedulingId,
+        IS_FILE_NAME_ENABLED AS isFileNameEnabled,
+        IS_FILE_AGE_ENABLED AS isFileAgeEnabled,
+        SCAN_PERIOD_TYPE AS scanPeriodType,
+        MODIFIED_WITHIN_MONTHS AS modifiedWithinMonths,
+        MODIFIED_MONTHS_AGO AS modifiedMonthsAgo,
+        MODIFIED_FROM_DATE AS modifiedFromDate,
+        MODIFIED_TO_DATE AS modifiedToDate,
+        IS_LARGER_THAN_ENABLED AS isLargerThanEnabled,
+        COMMON_OR_CUSTOM AS commonOrcustomFileType,
+        SIZE_LARGER_THAN AS sizeLargerThan,
+        IS_SMALLER_THAN_ENALBED AS isSmallerThanEnalbed,
+        SIZE_SMALLER_THAN AS sizeSmallerThan,
+        DEFINITION_TYPE AS definitionType,
+        OCR_ENABLED AS ocrEnabled,
+        IS_CPU_LIMIT_ENABLED AS isCpuLimitEnabled,
+        CPU_LIMIT_VALUE AS cpuLimitValue,
+        BUSY_BANDWIDTH_STARTDATE AS busyBandwidthStartdate,
+        BUSY_BANDWIDTH_ENDDATE AS busyBandwidthEnddate,
+        BUSY_BANDWIDTH_ENABLED AS busyBandwidthEnabled, BUSY_BANDWIDTH_LIMIT AS busyBandwidthLimit,
+        PERCENT_ENABLED AS percentEnabled,
+        PERCENT_AGE AS percentAge,
+        TIMER_ENABLED AS timerEnabled,
+        TIMER_AGE AS timerAge,
+        BE_CHECKED_ORG_ID AS beCheckedOrgId,
+        CHECK_ORG_NAME AS checkOrgName,
+        CHECK_USER AS checkUser,
+        CHECK_DATE AS checkDate,
+        OCR_PREPROCESS AS ocrPreprocess,
+        CREATED_BY AS createdBy
+        FROM sp_discovery_tasks dis
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </select>
+
+
+    <insert id="saveDiscoveryTask" parameterType="com.spinfosec.dao.entity.SpDiscoveryTasks">
+    insert into sp_discovery_tasks (ID, CREATE_DATE, NAME, 
+      DESCRIPTION, DISCOVERY_TASK_TYPE, ELEMENT_STATUS, 
+      TARGET_ID, SCHEDULING_ID, IS_FILE_NAME_ENABLED, 
+      IS_FILE_AGE_ENABLED, SCAN_PERIOD_TYPE, MODIFIED_WITHIN_MONTHS, 
+      MODIFIED_MONTHS_AGO, MODIFIED_FROM_DATE, 
+      MODIFIED_TO_DATE, IS_LARGER_THAN_ENABLED, 
+      SIZE_LARGER_THAN, IS_SMALLER_THAN_ENALBED, SIZE_SMALLER_THAN, 
+      DEFINITION_TYPE, OCR_ENABLED, IS_CPU_LIMIT_ENABLED, 
+      CPU_LIMIT_VALUE, BUSY_BANDWIDTH_STARTDATE, 
+      BUSY_BANDWIDTH_ENDDATE, BUSY_BANDWIDTH_ENABLED,
+      BUSY_BANDWIDTH_LIMIT, PERCENT_ENABLED, PERCENT_AGE,
+        TIMER_ENABLED, TIMER_AGE, BE_CHECKED_ORG_ID,
+        CHECK_ORG_NAME, CHECK_USER, CHECK_DATE, COMMON_OR_CUSTOM,
+      OCR_PREPROCESS, CREATED_BY)
+    values (#{id,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{name,jdbcType=VARCHAR}, 
+      #{description,jdbcType=VARCHAR}, #{discoveryTaskType,jdbcType=VARCHAR}, #{elementStatus,jdbcType=VARCHAR}, 
+      #{targetId,jdbcType=VARCHAR}, #{schedulingId,jdbcType=VARCHAR}, #{isFileNameEnabled,jdbcType=DECIMAL}, 
+      #{isFileAgeEnabled,jdbcType=DECIMAL}, #{scanPeriodType,jdbcType=VARCHAR}, #{modifiedWithinMonths,jdbcType=DECIMAL}, 
+      #{modifiedMonthsAgo,jdbcType=DECIMAL}, #{modifiedFromDate,jdbcType=TIMESTAMP}, 
+      #{modifiedToDate,jdbcType=TIMESTAMP}, #{isLargerThanEnabled,jdbcType=DECIMAL}, 
+      #{sizeLargerThan,jdbcType=DECIMAL}, #{isSmallerThanEnalbed,jdbcType=DECIMAL}, #{sizeSmallerThan,jdbcType=DECIMAL}, 
+      #{definitionType,jdbcType=VARCHAR}, #{ocrEnabled,jdbcType=DECIMAL}, #{isCpuLimitEnabled,jdbcType=DECIMAL}, 
+      #{cpuLimitValue,jdbcType=DECIMAL}, #{busyBandwidthStartdate,jdbcType=TIMESTAMP}, 
+      #{busyBandwidthEnddate,jdbcType=TIMESTAMP},#{busyBandwidthEnabled,jdbcType=DECIMAL},
+      #{busyBandwidthLimit,jdbcType=VARCHAR}, #{percentEnabled,jdbcType=DECIMAL}, #{percentAge,jdbcType=VARCHAR},
+        #{timerEnabled,jdbcType=DECIMAL}, #{timerAge,jdbcType=VARCHAR}, #{beCheckedOrgId,jdbcType=VARCHAR},
+        #{checkOrgName,jdbcType=VARCHAR}, #{checkUser,jdbcType=VARCHAR}, #{checkDate,jdbcType=VARCHAR},
+        #{commonOrcustomFileType,jdbcType=VARCHAR},
+      #{ocrPreprocess,jdbcType=DECIMAL}, #{createdBy,jdbcType=VARCHAR})
+  </insert>
+
+    <insert id="saveAlgorithmFileType" parameterType="com.spinfosec.dao.entity.SpAlgorithmFileType">
+        INSERT INTO sp_algorithm_file_type (ID,ALGORITHM_ID,FILE_TYPE,JOB_ID)
+        VALUES
+        (#{id,jdbcType=VARCHAR},#{algorithmId,jdbcType=VARCHAR},#{fileType,jdbcType=VARCHAR},#{jobId,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateDiscoveryTask" parameterType="com.spinfosec.dao.entity.SpDiscoveryTasks">
+        UPDATE sp_discovery_tasks
+        <set>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                DESCRIPTION = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="discoveryTaskType != null">
+                DISCOVERY_TASK_TYPE = #{discoveryTaskType,jdbcType=VARCHAR},
+            </if>
+            <if test="elementStatus != null">
+                ELEMENT_STATUS = #{elementStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="targetId != null">
+                TARGET_ID = #{targetId,jdbcType=VARCHAR},
+            </if>
+            <if test="schedulingId != null">
+                SCHEDULING_ID = #{schedulingId,jdbcType=VARCHAR},
+            </if>
+            <if test="isFileNameEnabled != null">
+                IS_FILE_NAME_ENABLED = #{isFileNameEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="commonOrcustomFileType != null">
+                COMMON_OR_CUSTOM = #{commonOrcustomFileType,jdbcType=DECIMAL},
+            </if>
+            <if test="isFileAgeEnabled != null">
+                IS_FILE_AGE_ENABLED = #{isFileAgeEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="scanPeriodType != null">
+                SCAN_PERIOD_TYPE = #{scanPeriodType,jdbcType=VARCHAR},
+            </if>
+            <if test="modifiedWithinMonths != null">
+                MODIFIED_WITHIN_MONTHS = #{modifiedWithinMonths,jdbcType=DECIMAL},
+            </if>
+            <if test="modifiedMonthsAgo != null">
+                MODIFIED_MONTHS_AGO = #{modifiedMonthsAgo,jdbcType=DECIMAL},
+            </if>
+            <if test="modifiedFromDate != null">
+                MODIFIED_FROM_DATE = #{modifiedFromDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifiedToDate != null">
+                MODIFIED_TO_DATE = #{modifiedToDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isLargerThanEnabled != null">
+                IS_LARGER_THAN_ENABLED = #{isLargerThanEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="sizeLargerThan != null">
+                SIZE_LARGER_THAN = #{sizeLargerThan,jdbcType=DECIMAL},
+            </if>
+            <if test="isSmallerThanEnalbed != null">
+                IS_SMALLER_THAN_ENALBED = #{isSmallerThanEnalbed,jdbcType=DECIMAL},
+            </if>
+            <if test="sizeSmallerThan != null">
+                SIZE_SMALLER_THAN = #{sizeSmallerThan,jdbcType=DECIMAL},
+            </if>
+            <if test="definitionType != null">
+                DEFINITION_TYPE = #{definitionType,jdbcType=VARCHAR},
+            </if>
+            <if test="ocrEnabled != null">
+                OCR_ENABLED = #{ocrEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="isCpuLimitEnabled != null">
+                IS_CPU_LIMIT_ENABLED = #{isCpuLimitEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="cpuLimitValue != null">
+                CPU_LIMIT_VALUE = #{cpuLimitValue,jdbcType=DECIMAL},
+            </if>
+            <if test="busyBandwidthStartdate != null">
+                BUSY_BANDWIDTH_STARTDATE = #{busyBandwidthStartdate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="busyBandwidthEnddate != null">
+                BUSY_BANDWIDTH_ENDDATE = #{busyBandwidthEnddate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="busyBandwidthEnabled != null">
+                BUSY_BANDWIDTH_ENABLED = #{busyBandwidthEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="busyBandwidthLimit != null">
+                BUSY_BANDWIDTH_LIMIT = #{busyBandwidthLimit,jdbcType=VARCHAR},
+            </if>
+            <if test="percentEnabled != null">
+                PERCENT_ENABLED = #{percentEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="percentAge != null">
+                PERCENT_AGE = #{percentAge,jdbcType=VARCHAR},
+            </if>
+            <if test="timerEnabled != null">
+                TIMER_ENABLED = #{timerEnabled,jdbcType=DECIMAL},
+            </if>
+            <if test="timerAge != null">
+                TIMER_AGE = #{timerAge,jdbcType=VARCHAR},
+            </if>
+            <if test="beCheckedOrgId != null">
+                BE_CHECKED_ORG_ID = #{beCheckedOrgId,jdbcType=VARCHAR},
+            </if>
+            <if test="checkOrgName != null">
+                CHECK_ORG_NAME = #{checkOrgName,jdbcType=VARCHAR},
+            </if>
+            <if test="checkUser != null">
+                CHECK_USER = #{checkUser,jdbcType=VARCHAR},
+            </if>
+            <if test="checkDate != null">
+                CHECK_DATE = #{checkDate,jdbcType=VARCHAR},
+            </if>
+            <if test="ocrPreprocess != null">
+                OCR_PREPROCESS = #{ocrPreprocess,jdbcType=DECIMAL},
+            </if>
+            <if test="createdBy != null">
+                CREATED_BY = #{createdBy,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <select id="getFileType" parameterType="java.util.HashMap" resultType="com.spinfosec.dao.entity.SpPlcFileTypes">
+        SELECT f.ID AS id,
+        f.OPTLOCK AS optlock,
+        f.DESCRIPTION AS description,
+        f.NAME AS name,
+        f.INT_VAL AS intVal,
+        f.EXTENSION AS extension,
+        f.COMMON_USE AS commonUse,
+        f.IS_UNICAST AS isUnicast,
+        f.POLICY_ENTITY_STATUS AS policyEntityStatus,
+        f.DEFINITION_TYPE AS definitionType,
+        fc.NAME_CN AS formatGroup
+        FROM sp_plc_file_types f LEFT JOIN sp_plc_file_types_category fc ON f.FORMAT_GROUP = fc.NAME_EN
+        WHERE 1 =1
+        <if test="extension != null">
+            AND f.EXTENSION Like concat(concat("%",#{extension}),"%")
+        </if>
+        <if test="formatGroup != null">
+            AND fc.NAME_CN Like concat(concat("%",#{formatGroup}),"%")
+        </if>
+        <if test="commonUse != null">
+            AND f.COMMON_USE = #{commonUse}
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY f.EXTENSION
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="getCommonFileType" resultType="com.spinfosec.dao.entity.SpPlcFileTypes">
+        SELECT f.ID AS id,
+        f.OPTLOCK AS optlock,
+        f.DESCRIPTION AS description,
+        f.NAME AS name,
+        f.INT_VAL AS intVal,
+        f.EXTENSION AS extension,
+        f.COMMON_USE AS commonUse,
+        f.IS_UNICAST AS isUnicast,
+        f.POLICY_ENTITY_STATUS AS policyEntityStatus,
+        f.DEFINITION_TYPE AS definitionType,
+        fc.NAME_CN AS formatGroup
+        FROM sp_plc_file_types f LEFT JOIN sp_plc_file_types_category fc ON f.FORMAT_GROUP = fc.NAME_EN
+        WHERE f.COMMON_USE = '1';
+    </select>
+
+    <update id="updateFileTypeCommon" parameterType="java.lang.String">
+        UPDATE sp_plc_file_types SET COMMON_USE = #{state} WHERE ID = #{id};
+    </update>
+
+    <select id="getEncryptionAlgorithm" resultType="com.spinfosec.dao.entity.SpEncryptionAlgorithm">
+        SELECT ID AS id,NAME AS name,DESCRIPTION AS description,TYPE AS type
+        FROM sp_encryption_algorithm
+    </select>
+
+    <update id="updateTaskStatus" parameterType="java.lang.String">
+        UPDATE sp_discovery_tasks SET ELEMENT_STATUS  = #{status} WHERE ID = #{disId};
+    </update>
+
+    <select id="getTargetPassByTargeId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT PASSWORD FROM sp_target_res WHERE ID = #{targetId}
+    </select>
+
+    <select id="getTargetIdByDisId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT TARGET_ID FROM  sp_discovery_tasks WHERE ID = #{disId}
+    </select>
+
+    <select id="getJobIdListByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT ID FROM  sp_discovery_tasks WHERE CREATED_BY = #{userId}
+    </select>
+</mapper>

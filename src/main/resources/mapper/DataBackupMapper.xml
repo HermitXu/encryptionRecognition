@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.DataBackupDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpDataBackups">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="LOCALPATH" jdbcType="VARCHAR" property="localpath"/>
+        <result column="DOWNLOAD_OPTLOCK" jdbcType="INTEGER" property="downloadOptlock"/>
+        <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="FILESIZE" jdbcType="DECIMAL" property="filesize"/>
+        <result column="TYPE" jdbcType="VARCHAR" property="type"/>
+        <result column="RECOVER_OPTLOCK" jdbcType="INTEGER" property="recoverOptlock"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="POLICY_ID" jdbcType="VARCHAR" property="policyId"/>
+        <result column="BEGIN_TIME" jdbcType="TIMESTAMP" property="beginTime"/>
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime"/>
+        <result column="IS_DEL" jdbcType="DECIMAL" property="isDel"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    ID, LOCALPATH, DOWNLOAD_OPTLOCK, CREATE_DATE, COMMENTS, FILESIZE, TYPE, RECOVER_OPTLOCK,
+        status, CREATED_BY, ARCHIVE_SCOPE, USE_POLICY
+  </sql>
+    <select id="queryData" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dto.pojo.system.SystemArchiveLogRsp">
+        SELECT
+        d.ID AS id,
+        d.LOCALPATH AS localPath,
+        d.DOWNLOAD_OPTLOCK AS downLoadOptlock,
+        d.CREATE_DATE AS createDate,
+        d.DESCRIPTION AS description,
+        d.FILESIZE AS fileSize,
+        d.TYPE AS type,
+        d.RECOVER_OPTLOCK AS recoverOptlock,
+        d.status AS status,
+        d.CREATED_BY AS createdBy,
+        a.USERNAME AS createdUserName
+        FROM sp_data_backups d LEFT JOIN sp_admins a ON d.CREATED_BY = a.ID WHERE d.TYPE = #{type}
+        <if test="createdBy != null">
+            AND d.CREATED_BY = #{createdBy}
+        </if>
+        <if test="createDate_startTime != null  and createDate_endTime != null">
+            AND d.CREATE_DATE BETWEEN #{createDate_startTime} AND #{createDate_endTime}
+        </if>
+        <if test="createDate_startTime != null  and createDate_endTime == null">
+            AND d.CREATE_DATE > #{createDate_startTime}
+        </if>
+        <if test="createDate_startTime == null  and createDate_endTime != null">
+            AND d.CREATE_DATE &lt; #{createDate_endTime}
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY d.CREATE_DATE
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <insert id="saveDataBackups" parameterType="com.spinfosec.dao.entity.SpDataBackups">
+        insert into sp_data_backups
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="localpath != null">
+                LOCALPATH,
+            </if>
+            <if test="downloadOptlock != null">
+                DOWNLOAD_OPTLOCK,
+            </if>
+            <if test="createDate != null">
+                CREATE_DATE,
+            </if>
+            <if test="description != null">
+                DESCRIPTION,
+            </if>
+            <if test="filesize != null">
+                FILESIZE,
+            </if>
+            <if test="type != null">
+                TYPE,
+            </if>
+            <if test="recoverOptlock != null">
+                RECOVER_OPTLOCK,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createdBy != null">
+                CREATED_BY,
+            </if>
+            <if test="policyId != null">
+                POLICY_ID,
+            </if>
+            <if test="beginTime != null">
+                BEGIN_TIME,
+            </if>
+            <if test="endTime != null">
+                END_TIME,
+            </if>
+            <if test="isDel != null">
+                IS_DEL,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="localpath != null">
+                #{localpath,jdbcType=VARCHAR},
+            </if>
+            <if test="downloadOptlock != null">
+                #{downloadOptlock,jdbcType=INTEGER},
+            </if>
+            <if test="createDate != null">
+                #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="filesize != null">
+                #{filesize,jdbcType=DECIMAL},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="recoverOptlock != null">
+                #{recoverOptlock,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="policyId != null">
+                #{policyId,jdbcType=VARCHAR},
+            </if>
+            <if test="beginTime != null">
+                #{beginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isDel != null">
+                #{isDel,jdbcType=DECIMAL},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="getystemAchiveLogById" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpDataBackups">
+        SELECT
+        d.ID AS id,
+        d.LOCALPATH AS localpath,
+        d.DOWNLOAD_OPTLOCK AS downloadOptlock,
+        d.CREATE_DATE AS createDate,
+        d.DESCRIPTION AS description,
+        d.FILESIZE AS filesize,
+        d.TYPE AS type,
+        d.RECOVER_OPTLOCK AS recoverOptlock,
+        d.status AS status,
+        d.CREATED_BY AS createdBy
+        FROM sp_data_backups d WHERE ID = #{id}
+    </select>
+
+    <update id="updateDataBackups" parameterType="com.spinfosec.dao.entity.SpDataBackups">
+        UPDATE sp_data_backups
+        <set>
+            <if test="localpath != null">
+                LOCALPATH = #{localpath,jdbcType=VARCHAR},
+            </if>
+            <if test="downloadOptlock != null">
+                DOWNLOAD_OPTLOCK = #{downloadOptlock,jdbcType=INTEGER},
+            </if>
+            <if test="createDate != null">
+                CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="description != null">
+                DESCRIPTION = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="filesize != null">
+                FILESIZE = #{filesize,jdbcType=DECIMAL},
+            </if>
+            <if test="type != null">
+                TYPE = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="recoverOptlock != null">
+                RECOVER_OPTLOCK = #{recoverOptlock,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                CREATED_BY = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="policyId != null">
+                POLICY_ID = #{policyId,jdbcType=VARCHAR},
+            </if>
+            <if test="beginTime != null">
+                BEGIN_TIME = #{beginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                END_TIME = #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isDel != null">
+                IS_DEL = #{isDel,jdbcType=DECIMAL},
+            </if>
+        </set>
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteDataBackupsById" parameterType="java.lang.String">
+        DELETE FROM sp_data_backups WHERE ID = #{id}
+    </delete>
+
+    <select id="getDataBackupsByPath" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpDataBackups">
+          SELECT
+        d.ID AS id,
+        d.LOCALPATH AS localpath,
+        d.DOWNLOAD_OPTLOCK AS downloadOptlock,
+        d.CREATE_DATE AS createDate,
+        d.DESCRIPTION AS description,
+        d.FILESIZE AS filesize,
+        d.TYPE AS type,
+        d.RECOVER_OPTLOCK AS recoverOptlock,
+        d.status AS status,
+        d.CREATED_BY AS createdBy
+        FROM sp_data_backups d WHERE d.LOCALPATH Like concat(concat("%",#{path}),"%")
+    </select>
+</mapper>

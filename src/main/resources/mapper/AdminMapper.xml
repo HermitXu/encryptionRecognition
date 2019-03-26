@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.AdminDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpAdmins">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
+        <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="EMAIL" jdbcType="VARCHAR" property="email"/>
+        <result column="ID_CARD" jdbcType="VARCHAR" property="idCard"/>
+        <result column="PASSWORD_CHANGE_FLAG" jdbcType="DECIMAL" property="passwordChangeFlag"/>
+        <result column="PASSWORD_MODIFY_DATE" jdbcType="TIMESTAMP" property="passwordModifyDate"/>
+        <result column="LAST_LOGIN_TIME" jdbcType="TIMESTAMP" property="lastLoginTime"/>
+        <result column="ACCOUNT_IS_DISABLED" jdbcType="DECIMAL" property="accountIsDisabled"/>
+        <result column="EXPIRATION_DATE" jdbcType="TIMESTAMP" property="expirationDate"/>
+        <result column="USER_TYPE" jdbcType="DECIMAL" property="userType"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="REGISTRATION_DATE" jdbcType="TIMESTAMP" property="registrationDate"/>
+        <result column="DEFINITION_TYPE" jdbcType="VARCHAR" property="definitionType"/>
+        <result column="EXTERNAL_USER_DN" jdbcType="VARCHAR" property="externalUserDn"/>
+        <result column="sm2_pubKeyX" jdbcType="VARCHAR" property="sm2PubKeyX"/>
+        <result column="sm2_pubKeyY" jdbcType="VARCHAR" property="sm2PubKeyY"/>
+        <result column="usbkeyId" jdbcType="VARCHAR" property="usbkeyId"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="PHONE" jdbcType="VARCHAR" property="phone"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        ID, USERNAME, PASSWORD, NAME, EMAIL, ID_CARD, PASSWORD_CHANGE_FLAG, PASSWORD_MODIFY_DATE,
+        LAST_LOGIN_TIME, ACCOUNT_IS_DISABLED, EXPIRATION_DATE, USER_TYPE,CREATED_BY,DESCRIPTION, REGISTRATION_DATE,
+        DEFINITION_TYPE, EXTERNAL_USER_DN, sm2_pubKeyX, sm2_pubKeyY, usbkeyId,CREATED_BY,PHONE
+    </sql>
+
+    <select id="findSpAdminById" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sp_admins
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getChildByUserId" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpAdmins">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sp_admins
+        WHERE CREATED_BY = #{userId,jdbcType=VARCHAR}
+    </select>
+
+    <update id="updateAdminState" parameterType="java.lang.String">
+        UPDATE sp_admins  SET ACCOUNT_IS_DISABLED  = #{state}  WHERE ID = #{id}
+    </update>
+
+    <select id="findRoleIdByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT ROLE_ID FROM sp_role_admin_relation WHERE ADMIN_ID = #{userId}
+    </select>
+
+    <select id="findUserIdByRoleId" parameterType="java.lang.String" resultType="java.lang.String">
+         SELECT ADMIN_ID  FROM sp_role_admin_relation WHERE  ROLE_ID = #{roleId}
+    </select>
+
+    <select id="findOrgIdByUserId" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT ORG_ID FROM sp_org_admin_relation WHERE ADMIN_ID = #{userId}
+    </select>
+
+    <select id="findTrustHostByUserId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpAdminHostSetting">
+        SELECT
+        hs.ID AS id,
+        hs.NAME AS name,
+        hs.HOST_IP AS hostIp,
+        hs.HOST_MAC AS hostMac,
+        hs.CREATED_BY AS createdBy,
+        hs.CREATE_DATE AS createDate,
+        hs.DESCRIPTION AS description
+        FROM sp_admin_host_setting hs LEFT JOIN  sp_admin_trust_host h ON hs.ID = h.HOST_ID
+        WHERE h.ADMIN_ID = #{userId}
+    </select>
+
+    <select id="findUserByName" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpAdmins">
+        SELECT a.ID AS id,a.USERNAME AS userName, a.NAME AS name,a.USER_TYPE AS userType,a.EMAIL AS email,
+        a.ACCOUNT_IS_DISABLED AS accountIsDisabled,a.PHONE AS phone,
+        DATE_FORMAT(a.REGISTRATION_DATE, '%Y-%m-%d %H:%i:%s') AS registrationDate,
+        EXPIRATION_DATE AS expirationDate
+         FROM sp_admins a WHERE a.USERNAME =#{arg0}
+    </select>
+
+    <select id="findLogUserInfo" parameterType="java.lang.String" resultType="com.spinfosec.dto.pojo.system.CustomSpAdminsBean">
+        SELECT
+        a.ID AS id,
+        a.USERNAME AS userName,
+        a.PASSWORD AS password,
+        a.NAME AS name,
+        a.EMAIL AS email,
+        r.ID AS roleId,
+        r.NAME AS roleName,
+        a.REGISTRATION_DATE AS registrationDate,
+        a.PASSWORD_CHANGE_FLAG AS passwordChangeFlag,
+        a.PASSWORD_MODIFY_DATE AS passwordModifyDate,
+        a.ACCOUNT_IS_DISABLED AS accountIsDisabled,
+        a.sm2_pubKeyX AS sm2_pubKeyX,
+        a.sm2_pubKeyY AS sm2_pubKeyY
+        FROM sp_admins a,sp_roles r,sp_role_admin_relation ra
+        WHERE a.ID = ra.ADMIN_ID AND r.ID = ra.ROLE_ID AND a.USERNAME =#{arg0};
+    </select>
+
+    <select id="findLoginInfoByUserId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dto.pojo.system.CustomSpAdminsBean">
+         SELECT a.ID AS id,a.USERNAME AS name,a.EMAIL AS email,r.ID AS roleId,r.NAME AS roleName FROM sp_admins a,sp_roles r,sp_role_admin_relation ra
+        WHERE a.ID = ra.ADMIN_ID AND r.ID = ra.ROLE_ID AND a.ID = #{userId};
+    </select>
+
+    <select id="getUserByName" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpAdmins">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sp_admins a WHERE a.USERNAME =#{userName};
+    </select>
+
+    <select id="getRoleUrlFunctions" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpCodeDecodes">
+        SELECT c.ID as id,c.NAME AS name,c.PARENT_ID AS parentId,c.URL AS url,c.ICON AS icon,c.SHOW AS isShow
+        FROM sp_code_decodes c,sp_role_module_permissions m WHERE m.ROLE_ID  = #{arg0} AND m.MODULE_ID = c.ID ORDER BY c.ORDER;
+    </select>
+
+    <select id="getAllCodeDecodes" resultType="com.spinfosec.dao.entity.SpCodeDecodes">
+        SELECT
+        c.ID as id,
+        c.NAME AS name,
+        c.PARENT_ID AS parentId,
+        c.URL AS url,
+        c.ICON AS icon,
+        c.SHOW AS isShow
+        FROM sp_code_decodes c;
+    </select>
+
+    <insert id="saveUserAndRole" parameterType="com.spinfosec.dao.entity.SpRoleAdminRelation">
+        INSERT INTO sp_role_admin_relation(ID,ROLE_ID,ADMIN_ID)
+        VALUES (#{id,jdbcType=VARCHAR},#{roleId,jdbcType=VARCHAR},#{adminId,jdbcType=VARCHAR})
+    </insert>
+
+    <delete id="deleteUserAndRole" parameterType="java.lang.String">
+         DELETE FROM  sp_role_admin_relation WHERE ADMIN_ID = #{arg0}
+    </delete>
+
+    <insert id="saveUserAndOrg" parameterType="com.spinfosec.dao.entity.SpOrgAdminRelation">
+        INSERT INTO sp_org_admin_relation(ID,ORG_ID,ADMIN_ID)
+        VALUES (#{id,jdbcType=VARCHAR},#{orgId,jdbcType=VARCHAR},#{adminId,jdbcType=VARCHAR});
+    </insert>
+
+    <delete id="deleteUserAndOrg" parameterType="java.lang.String">
+        DELETE FROM sp_org_admin_relation WHERE ADMIN_ID = #{arg0}
+    </delete>
+
+    <select id="querySpAdmins" parameterType="java.util.HashMap" resultType="com.spinfosec.dto.pojo.system.CustomSpAdminsBean">
+        SELECT
+        a.ID AS id,
+        a.USERNAME AS userName,
+        a.NAME AS name,
+        a.USER_TYPE AS userType,
+        a.EMAIL AS email,
+        a.ACCOUNT_IS_DISABLED AS accountIsDisabled,
+        a.PHONE AS phone,
+        DATE_FORMAT(a.REGISTRATION_DATE, '%Y-%m-%d %H:%i:%s') AS registrationDate,
+        DATE_FORMAT(a.EXPIRATION_DATE, '%Y-%m-%d %H:%i:%s') AS expirationDate,
+        r.ID AS roleId,
+        r.NAME AS roleName,
+        a.DEFINITION_TYPE AS definitionType
+        FROM sp_admins a
+        LEFT JOIN sp_role_admin_relation ra on a.ID = ra.ADMIN_ID
+        LEFT JOIN sp_roles r ON ra.ROLE_ID = r.ID
+        WHERE 1 = 1
+        <if test="createdBy != null">
+            AND a.CREATED_BY = #{createdBy}
+        </if>
+        <if test="name != null">
+            AND a.NAME Like concat(concat("%",#{name}),"%")
+        </if>
+        <if test="userName != null">
+            AND a.USERNAME Like concat(concat("%",#{userName}),"%")
+        </if>
+        <if test="roleName != null">
+            AND r.NAME Like concat(concat("%",#{roleName}),"%")
+        </if>
+        <if test="userType != null">
+            AND a.USER_TYPE = #{userType}
+        </if>
+        <if test="description != null">
+            AND a.DESCRIPTION Like concat(concat("%",#{description}),"%")
+        </if>
+        <if test="accountIsDisabled != null">
+            AND a.ACCOUNT_IS_DISABLED =#{accountIsDisabled}
+        </if>
+        <if test="definitionType != null">
+            AND a.DEFINITION_TYPE =#{definitionType}
+        </if>
+        <if test="sort != null">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY a.NAME
+        </if>
+        <if test="order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="countSpAdmins" parameterType="java.util.HashMap" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM sp_admins a,sp_roles r,sp_role_admin_relation ra
+        WHERE a.ID = ra.ADMIN_ID AND r.ID = ra.ROLE_ID
+        <if test="createdBy != null">
+            AND a.CREATED_BY = #{createdBy}
+        </if>
+        <if test="name != null">
+            AND a.name Like concat(concat("%",#{name}),"%")
+        </if>
+        <if test="userName != null">
+            AND a.USERNAME Like concat(concat("%",#{userName}),"%")
+        </if>
+        <if test="roleName != null">
+            AND r.NAME Like concat(concat("%",#{roleName}),"%")
+        </if>
+        <if test="userType != null">
+            AND a.USER_TYPE = #{userType}
+        </if>
+        <if test="description != null">
+            AND a.DESCRIPTION = Like concat(concat("%",#{description}),"%")
+        </if>
+    </select>
+
+
+    <insert id="saveSpAdmin" parameterType="com.spinfosec.dao.entity.SpAdmins">
+        INSERT INTO sp_admins
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="username != null">
+                USERNAME,
+            </if>
+            <if test="password != null">
+                PASSWORD,
+            </if>
+            <if test="name != null">
+                NAME,
+            </if>
+            <if test="email != null">
+                EMAIL,
+            </if>
+            <if test="idCard != null">
+                ID_CARD,
+            </if>
+            <if test="passwordChangeFlag != null">
+                PASSWORD_CHANGE_FLAG,
+            </if>
+            <if test="passwordModifyDate != null">
+                PASSWORD_MODIFY_DATE,
+            </if>
+            <if test="lastLoginTime != null">
+                LAST_LOGIN_TIME,
+            </if>
+            <if test="accountIsDisabled != null">
+                ACCOUNT_IS_DISABLED,
+            </if>
+            <if test="expirationDate != null">
+                EXPIRATION_DATE,
+            </if>
+            <if test="userType != null">
+                USER_TYPE,
+            </if>
+            <if test="description != null">
+                DESCRIPTION,
+            </if>
+            <if test="registrationDate != null">
+                REGISTRATION_DATE,
+            </if>
+            <if test="definitionType != null">
+                DEFINITION_TYPE,
+            </if>
+            <if test="externalUserDn != null">
+                EXTERNAL_USER_DN,
+            </if>
+            <if test="sm2PubKeyX != null">
+                sm2_pubKeyX,
+            </if>
+            <if test="sm2PubKeyY != null">
+                sm2_pubKeyY,
+            </if>
+            <if test="usbkeyId != null">
+                usbkeyId,
+            </if>
+            <if test="createdBy != null">
+                CREATED_BY,
+            </if>
+            <if test="phone != null">
+                PHONE,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="idCard != null">
+                #{idCard,jdbcType=VARCHAR},
+            </if>
+            <if test="passwordChangeFlag != null">
+                #{passwordChangeFlag,jdbcType=DECIMAL},
+            </if>
+            <if test="passwordModifyDate != null">
+                #{passwordModifyDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastLoginTime != null">
+                #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="accountIsDisabled != null">
+                #{accountIsDisabled,jdbcType=DECIMAL},
+            </if>
+            <if test="expirationDate != null">
+                #{expirationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userType != null">
+                #{userType,jdbcType=DECIMAL},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="registrationDate != null">
+                #{registrationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="definitionType != null">
+                #{definitionType,jdbcType=VARCHAR},
+            </if>
+            <if test="externalUserDn != null">
+                #{externalUserDn,jdbcType=VARCHAR},
+            </if>
+            <if test="sm2PubKeyX != null">
+                #{sm2PubKeyX,jdbcType=VARCHAR},
+            </if>
+            <if test="sm2PubKeyY != null">
+                #{sm2PubKeyY,jdbcType=VARCHAR},
+            </if>
+            <if test="usbkeyId != null">
+                #{usbkeyId,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                #{phone,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateSpAdmin" parameterType="com.spinfosec.dao.entity.SpAdmins">
+        UPDATE sp_admins
+        <set>
+            <if test="username != null">
+                USERNAME = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+                PASSWORD = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                EMAIL = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="idCard != null">
+                ID_CARD = #{idCard,jdbcType=VARCHAR},
+            </if>
+            <if test="passwordChangeFlag != null">
+                PASSWORD_CHANGE_FLAG = #{passwordChangeFlag,jdbcType=DECIMAL},
+            </if>
+            <if test="passwordModifyDate != null">
+                PASSWORD_MODIFY_DATE = #{passwordModifyDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastLoginTime != null">
+                LAST_LOGIN_TIME = #{lastLoginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="accountIsDisabled != null">
+                ACCOUNT_IS_DISABLED = #{accountIsDisabled,jdbcType=DECIMAL},
+            </if>
+            <if test="expirationDate != null">
+                EXPIRATION_DATE = #{expirationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userType != null">
+                USER_TYPE = #{userType,jdbcType=DECIMAL},
+            </if>
+            <if test="description != null">
+                DESCRIPTION = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="registrationDate != null">
+                REGISTRATION_DATE = #{registrationDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="definitionType != null">
+                DEFINITION_TYPE = #{definitionType,jdbcType=VARCHAR},
+            </if>
+            <if test="externalUserDn != null">
+                EXTERNAL_USER_DN = #{externalUserDn,jdbcType=VARCHAR},
+            </if>
+            <if test="sm2PubKeyX != null">
+                sm2_pubKeyX = #{sm2PubKeyX,jdbcType=VARCHAR},
+            </if>
+            <if test="sm2PubKeyY != null">
+                sm2_pubKeyY = #{sm2PubKeyY,jdbcType=VARCHAR},
+            </if>
+            <if test="usbkeyId != null">
+                usbkeyId = #{usbkeyId,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                CREATED_BY = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                PHONE = #{phone,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteSpAdminById" parameterType="java.lang.String">
+        DELETE FROM sp_admins
+        WHERE ID = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="getCurruserUserById" parameterType="java.lang.String"
+            resultType="com.spinfosec.dto.pojo.system.CustomSpAdminsBean">
+         SELECT a.ID AS id,a.USERNAME AS userName,a.NAME AS name,a.EMAIL AS email,a.PHONE AS phone,
+         DATE_FORMAT(a.REGISTRATION_DATE, '%Y-%m-%d %H:%i:%s') AS registrationDate, r.ID AS roleId,r.NAME AS roleName,
+         o.ID AS orgId,o.NAME AS orgName,
+         r.ROLE_TYPE as roleType
+         FROM sp_admins a
+         LEFT JOIN sp_role_admin_relation ra on a.ID = ra.ADMIN_ID
+         LEFT JOIN sp_roles r ON ra.ROLE_ID = r.ID
+         LEFT JOIN sp_org_admin_relation oa ON oa.ADMIN_ID = a.ID
+         LEFT JOIN sp_org_unit_dict o ON o.ID = oa.ORG_ID
+        WHERE  a.ID = #{userId}
+    </select>
+
+    <select id="findUserByEmailAndName" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dao.entity.SpAdmins">
+      SELECT a.ID AS id,a.USERNAME AS userName,a.PASSWORD AS password,a.NAME AS name,a.EMAIL AS email
+         FROM sp_admins a WHERE a.EMAIL = #{email} AND a.USERNAME = #{userName} AND a.ACCOUNT_IS_DISABLED = '0'
+    </select>
+
+    <select id="findSysadminInfo" resultType="com.spinfosec.dao.entity.SpAdmins">
+        SELECT a.ID AS id,a.USERNAME AS userName,a.PASSWORD AS password,a.NAME AS name,a.EMAIL AS email
+         FROM sp_admins a WHERE DEFINITION_TYPE = 'C_PRE_DEFINE' AND  USERNAME = 'sysadmin'
+    </select>
+
+    <insert id="saveAdminTrustHost" parameterType="com.spinfosec.dao.entity.SpAdminTrustHost">
+        INSERT  INTO sp_admin_trust_host (ID, ADMIN_ID, HOST_ID
+        )
+        values (#{id,jdbcType=VARCHAR}, #{adminId,jdbcType=VARCHAR}, #{hostId,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <delete id="deldeteAdminTrustHostByHostId" parameterType="java.lang.String">
+        DELETE FROM  sp_admin_trust_host WHERE HOST_ID = #{arg0}
+    </delete>
+
+    <delete id="deldeteAdminTrustHostByAdminId" parameterType="java.lang.String">
+        DELETE FROM  sp_admin_trust_host WHERE ADMIN_ID = #{arg0}
+    </delete>
+</mapper>

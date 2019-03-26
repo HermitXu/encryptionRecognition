@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.RoleDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpRoles">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="ROLE_TYPE" jdbcType="VARCHAR" property="roleType"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="CREATE_DATE" jdbcType="TIMESTAMP" property="createDate"/>
+        <result column="CREATED_BY" jdbcType="VARCHAR" property="createdBy"/>
+        <result column="DEFINITION_TYPE" jdbcType="VARCHAR" property="definitionType"/>
+    </resultMap>
+
+    <select id="getRoleById" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpRoles">
+         SELECT ID AS id,NAME AS name,ROLE_TYPE as roleType,DESCRIPTION AS description,CREATE_DATE as
+        createDate,CREATED_BY AS createdBy,
+        DEFINITION_TYPE AS definitionType FROM sp_roles WHERE ID = #{id}
+    </select>
+    <select id="querySpRolesByPage" parameterType="java.util.HashMap" resultType="com.spinfosec.dao.entity.SpRoles">
+        SELECT
+        ID AS id,
+        NAME AS name,
+        ROLE_TYPE as roleType,
+        DESCRIPTION AS description,
+        CREATE_DATE as createDate,
+        CREATED_BY AS createdBy,
+        DEFINITION_TYPE AS definitionType FROM sp_roles WHERE DEFINITION_TYPE <![CDATA[!=]]> 'C_PRE_DEFINE'
+        <if test="createdBy != null">
+            AND CREATED_BY = #{createdBy}
+        </if>
+        <if test="name != null">
+            AND NAME Like concat(concat("%",#{name}),"%")
+        </if>
+        <if test="description != null">
+            AND DESCRIPTION Like concat(concat("%",#{description}),"%")
+        </if>
+        <if test="createDate != null">
+            AND CREATE_DATE Like concat(concat("%",#{createDate}),"%")
+        </if>
+        <if test="definitionType != null">
+            AND DEFINITION_TYPE Like concat(concat("%",#{definitionType}),"%")
+        </if>
+    </select>
+
+
+    <select id="getPermissionByRole" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpCodeDecodes">
+        SELECT c.ID as id,c.NAME AS name,c.PARENT_ID AS parentId,c.URL AS url,c.ICON AS icon,c.SHOW AS isShow
+        FROM sp_code_decodes c LEFT JOIN sp_role_module_permissions m
+        ON m.MODULE_ID = c.ID   WHERE m.ROLE_ID  = #{arg0} ORDER BY c.ORDER;
+    </select>
+
+    <select id="getModulePermissions" parameterType="java.lang.String"
+            resultType="com.spinfosec.dao.entity.SpRoleModulePermissions">
+        SELECT ID AS id,MODULE_ID AS moduleId,ROLE_ID  AS roleId FROM sp_role_module_permissions WHERE ROLE_ID = #{roleId}
+    </select>
+
+
+    <select id="getAllSpRole" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpRoles">
+         SELECT
+         ID AS id,
+         NAME AS name,
+         ROLE_TYPE as roleType,
+         DESCRIPTION AS description,
+         CREATE_DATE as createDate,
+         CREATED_BY AS createdBy,
+         DEFINITION_TYPE AS definitionType
+        FROM sp_roles WHERE DEFINITION_TYPE  <![CDATA[!=]]> 'C_PRE_DEFINE' AND CREATED_BY = #{roleId}
+    </select>
+
+    <delete id="deleteRoleById" parameterType="java.lang.String">
+    delete from sp_roles
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+
+    <delete id="deleteModulePermissionsByRoleId" parameterType="java.lang.String">
+        DELETE FROM sp_role_module_permissions WHERE ROLE_ID = #{roleId}
+    </delete>
+
+    <delete id="deleteUserAndRole" parameterType="java.lang.String">
+         DELETE FROM sp_role_admin_relation WHERE ROLE_ID = #{roleId}
+    </delete>
+    <insert id="savaSpRole" parameterType="com.spinfosec.dao.entity.SpRoles">
+    insert into sp_roles (ID, NAME, ROLE_TYPE, 
+      DESCRIPTION, CREATE_DATE, CREATED_BY, 
+      DEFINITION_TYPE)
+    values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{roleType,jdbcType=VARCHAR}, 
+      #{description,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{createdBy,jdbcType=VARCHAR}, 
+      #{definitionType,jdbcType=VARCHAR})
+  </insert>
+
+    <insert id="saveModulePermissions" parameterType="com.spinfosec.dao.entity.SpRoleModulePermissions">
+         insert into sp_role_module_permissions (ID, MODULE_ID, ROLE_ID)
+          values (#{id,jdbcType=VARCHAR}, #{moduleId,jdbcType=VARCHAR}, #{roleId,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateSpRole" parameterType="com.spinfosec.dao.entity.SpRoles">
+        UPDATE sp_roles
+        <set>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="roleType != null">
+                ROLE_TYPE = #{roleType,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                DESCRIPTION = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                CREATE_DATE = #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null">
+                CREATED_BY = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="definitionType != null">
+                DEFINITION_TYPE = #{definitionType,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

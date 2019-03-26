@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spinfosec.dao.TaskCenterDao">
+    <resultMap id="BaseResultMap" type="com.spinfosec.dao.entity.SpTask">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="jobId" jdbcType="VARCHAR" property="jobId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="startTime" jdbcType="DATE" property="startTime"/>
+        <result column="endTime" jdbcType="DATE" property="endTime"/>
+        <result column="failReason" jdbcType="VARCHAR" property="failReason"/>
+        <result column="result" jdbcType="VARCHAR" property="result"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="isLast" jdbcType="VARCHAR" property="isLast"/>
+        <result column="size" jdbcType="VARCHAR" property="size"/>
+        <result column="orgId" jdbcType="VARCHAR" property="orgId"/>
+        <result column="orgName" jdbcType="VARCHAR" property="orgName"/>
+        <result column="totalCount" jdbcType="VARCHAR" property="totalCount"/>
+        <result column="totalRecordCount" jdbcType="VARCHAR" property="totalRecordCount"/>
+        <result column="successCount" jdbcType="VARCHAR" property="successCount"/>
+        <result column="successRecordCount" jdbcType="VARCHAR" property="successRecordCount"/>
+        <result column="failCount" jdbcType="VARCHAR" property="failCount"/>
+        <result column="failRecordCount" jdbcType="VARCHAR" property="failRecordCount"/>
+    </resultMap>
+
+    <select id="queryTaskCent" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dto.pojo.system.TaskCenterRsp">
+        SELECT dis.ID AS id,
+        dis.NAME AS name,
+        tar.RES_TYPE AS type,
+        tar.IP AS ip,
+        IFNULL(t.ID,"") AS taskId,
+        t.startTime AS startTime,
+        t.endTime AS endTime,
+        IFNULL(t.status,"0") AS status,
+        IFNULL(t.result,"UNSTART") AS result,
+        IFNULL(t.failReason,"") AS failReason,
+        IFNULL(t.size,"0") AS size,
+        IFNULL(t.totalCount,"0") AS totalCount,
+        IFNULL(t.successCount,"0") AS successCount,
+        IFNULL(a.USERNAME,"") AS createdName,
+        dis.ELEMENT_STATUS AS elementStatus
+        FROM sp_discovery_tasks dis
+        LEFT JOIN sp_target_res tar ON dis.TARGET_ID = tar.ID
+        LEFT JOIN sp_task t ON t.jobId = dis.ID
+        LEFT JOIN sp_admins a ON a.ID = dis.CREATED_BY
+        WHERE 1 = 1 AND (t.isLast IS NULL OR t.isLast = '1')
+        <if test="createdBy != null">
+            AND dis.CREATED_BY = #{createdBy}
+        </if>
+        <if test="name != null">
+            AND dis.NAME Like concat(concat("%",#{name}),"%")
+        </if>
+        <if test="type != null">
+            AND tar.RES_TYPE = #{type}
+        </if>
+        <if test="ip != null">
+            AND tar.IP Like concat(concat("%",#{ip}),"%")
+        </if>
+        <if test="ip != null">
+            AND tar.IP Like concat(concat("%",#{ip}),"%")
+        </if>
+        <if test="startTime_beginTime != null and startTime_endTime != null">
+            AND t.startTime BETWEEN #{startTime_beginTime} AND #{startTime_endTime}
+        </if>
+        <if test="startTime_beginTime != null and startTime_endTime == null">
+            AND t.startTime &gt;= #{startTime_beginTime}
+        </if>
+        <if test="startTime_beginTime == null and startTime_endTime != null">
+            AND t.startTime &lt;= #{startTime_endTime}
+        </if>
+        <if test="endTime_beginTime != null and endTime_endTime != null">
+            AND t.endTime BETWEEN #{endTime_beginTime} AND #{endTime_endTime}
+        </if>
+        <if test="endTime_beginTime != null and endTime_endTime == null">
+            AND t.endTime &gt;= #{endTime_beginTime}
+        </if>
+        <if test="endTime_beginTime == null and endTime_endTime != null">
+            AND t.endTime &lt;= #{endTime_endTime}
+        </if>
+        <if test="sort != null and sort != ''">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY dis.CREATE_DATE
+        </if>
+        <if test="order != null and order != ''">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="queryTaskSuccessFile" parameterType="java.util.HashMap"
+            resultType="com.spinfosec.dao.entity.SpTaskFiles">
+        SELECT
+        id AS id,
+        lastModified AS lastModified,
+        name AS name,
+        taskId AS taskId,
+        scanTime AS scanTime
+        FROM sp_task_files
+        WHERE taskId = #{taskId}
+        <if test="sort != null and sort != ''">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY scanTime
+        </if>
+        <if test="order != null and order != ''">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <select id="queryTaskFailFile" parameterType="java.util.HashMap" resultType="com.spinfosec.dao.entity.SpTaskSipped">
+        SELECT
+        id AS id,
+        name AS name,
+        status AS status,
+        taskId AS taskId,
+        scanTime AS scanTime
+        FROM sp_task_sipped
+        WHERE taskId = #{taskId}
+        <if test="sort != null and sort != ''">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY scanTime
+        </if>
+        <if test="order != null and order != ''">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+    <update id="updateTaskOperationStatus" parameterType="java.lang.String">
+       UPDATE sp_task t SET result = #{operationStatus} WHERE jobId = #{jobId} AND ID = #{taskId}
+    </update>
+
+    <select id="getTaskInfoByDisId" parameterType="java.lang.String"
+            resultType="com.spinfosec.dto.pojo.system.TaskCenterRsp">
+        SELECT dis.ID AS id,
+        t.name AS name,
+        tar.RES_TYPE AS type,
+        tar.IP AS ip,
+        IFNULL(t.ID,"") AS taskId,
+        t.startTime AS startTime,
+        t.endTime AS endTime,
+        IFNULL(t.status,"0") AS status,
+        IFNULL(t.result,"UNSTART") AS result,
+        IFNULL(t.failReason,"") AS failReason,
+        IFNULL(t.size,"0") AS size,
+        IFNULL(t.totalCount,"0") AS totalCount,
+        IFNULL(t.successCount,"0") AS successCount,
+        IFNULL(a.USERNAME,"") AS createdName,
+        dis.ELEMENT_STATUS AS elementStatus
+        FROM sp_discovery_tasks dis
+        LEFT JOIN sp_target_res tar ON dis.TARGET_ID = tar.ID
+        LEFT JOIN sp_task t ON t.jobId = dis.ID
+        LEFT JOIN sp_admins a ON a.ID = dis.CREATED_BY
+        WHERE 1 = 1 AND (t.isLast IS NOT NULL AND t.isLast != '1')
+        AND dis.ID = #{id}
+        <if test="createdBy != null">
+            AND dis.CREATED_BY = #{createdBy}
+        </if>
+        <if test="name != null">
+            AND dis.NAME Like concat(concat("%",#{name}),"%")
+        </if>
+        <if test="type != null">
+            AND tar.RES_TYPE Like concat(concat("%",#{type}),"%")
+        </if>
+        <if test="ip != null">
+            AND tar.IP Like concat(concat("%",#{ip}),"%")
+        </if>
+        <if test="ip != null">
+            AND tar.IP Like concat(concat("%",#{ip}),"%")
+        </if>
+        <if test="startTime_beginTime != null and startTime_endTime != null">
+            AND t.startTime BETWEEN #{startTime_beginTime} AND #{startTime_endTime}
+        </if>
+        <if test="startTime_beginTime != null and startTime_endTime == null">
+            AND t.startTime &gt;= #{startTime_beginTime}
+        </if>
+        <if test="startTime_beginTime == null and startTime_endTime != null">
+            AND t.startTime &lt;= #{startTime_endTime}
+        </if>
+        <if test="endTime_beginTime != null and endTime_endTime != null">
+            AND t.endTime BETWEEN #{endTime_beginTime} AND #{endTime_endTime}
+        </if>
+        <if test="endTime_beginTime != null and endTime_endTime == null">
+            AND t.endTime &gt;= #{endTime_beginTime}
+        </if>
+        <if test="endTime_beginTime == null and endTime_endTime != null">
+            AND t.endTime &lt;= #{endTime_endTime}
+        </if>
+        <if test="sort != null  and sort != ''">
+            ORDER BY ${sort}
+        </if>
+        <if test="sort == null">
+            ORDER BY t.startTime
+        </if>
+        <if test="order != null and order != null">
+            ${order}
+        </if>
+        <if test="order == null">
+            DESC
+        </if>
+    </select>
+
+
+    <delete id="deleteTaskById" parameterType="java.lang.String">
+        DELETE FROM  sp_task
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="saveTask" parameterType="com.spinfosec.dao.entity.SpTask">
+    INSERT INTO sp_task (id, jobId, name,
+      type, startTime, endTime, 
+      failReason, result, status, 
+      isLast, size, orgId, 
+      orgName, totalCount, totalRecordCount, 
+      successCount, successRecordCount, failCount, 
+      failRecordCount)
+        VALUES (#{id,jdbcType=VARCHAR}, #{jobId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+        #{type,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP},
+        #{failReason,jdbcType=VARCHAR}, #{result,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR},
+        #{isLast,jdbcType=VARCHAR}, #{size,jdbcType=VARCHAR}, #{orgId,jdbcType=VARCHAR},
+        #{orgName,jdbcType=VARCHAR}, #{totalCount,jdbcType=VARCHAR}, #{totalRecordCount,jdbcType=VARCHAR},
+        #{successCount,jdbcType=VARCHAR}, #{successRecordCount,jdbcType=VARCHAR}, #{failCount,jdbcType=VARCHAR},
+        #{failRecordCount,jdbcType=VARCHAR})
+  </insert>
+
+    <insert id="saveTaskSuccessFile" parameterType="com.spinfosec.dao.entity.SpTaskFiles">
+      INSERT INTO sp_task_files (id, lastModified, name,
+          taskId, scanTime)
+        VALUES (#{id,jdbcType=VARCHAR}, #{lastModified,jdbcType=TIMESTAMP}, #{name,jdbcType=VARCHAR},
+          #{taskId,jdbcType=VARCHAR}, #{scanTime,jdbcType=TIMESTAMP})
+    </insert>
+
+    <insert id="saveTaskFailedFile" parameterType="com.spinfosec.dao.entity.SpTaskSipped">
+          INSERT INTO sp_task_sipped (id,name,status,
+          taskId, scanTime)
+        VALUES (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},#{status,jdbcType=VARCHAR},
+          #{taskId,jdbcType=VARCHAR}, #{scanTime,jdbcType=TIMESTAMP})
+    </insert>
+
+    <insert id="deleteTaskSuccessFile" parameterType="java.lang.String">
+        DELETE FROM sp_task_files WHERE  taskId = #{taskId};
+    </insert>
+
+    <insert id="deleteTaskFailedFile" parameterType="java.lang.String">
+        DELETE FROM sp_task_sipped WHERE  taskId = #{taskId};
+    </insert>
+
+    <select id="getIsLastTaskByJobId" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpTask">
+        SELECT
+        ID AS id,
+        jobId AS jobId,
+        name AS name,
+        type AS type,
+        startTime AS startTime,
+        endTime AS endTime,
+        failReason AS failReason,
+        result AS result,
+        status AS status,
+        isLast AS isLast,
+        size AS size,
+        orgId AS orgId,
+        orgName AS orgName,
+        totalCount AS totalCount,
+        totalRecordCount AS totalRecordCount,
+        successCount AS successCount,
+        successRecordCount AS successRecordCount,
+        failCount AS failCount,
+        failRecordCount AS failRecordCount
+        FROM sp_task WHERE jobId  = #{jobid} AND isLast = '1'
+    </select>
+
+
+    <select id="getTaskById" parameterType="java.lang.String" resultType="com.spinfosec.dao.entity.SpTask">
+         SELECT
+        ID AS id,
+        jobId AS jobId,
+        name AS name,
+        type AS type,
+        startTime AS startTime,
+        endTime AS endTime,
+        failReason AS failReason,
+        result AS result,
+        status AS status,
+        isLast AS isLast,
+        size AS size,
+        orgId AS orgId,
+        orgName AS orgName,
+        totalCount AS totalCount,
+        totalRecordCount AS totalRecordCount,
+        successCount AS successCount,
+        successRecordCount AS successRecordCount,
+        failCount AS failCount,
+        failRecordCount AS failRecordCount
+        FROM sp_task WHERE ID  = #{id}
+    </select>
+
+    <update id="updateTask" parameterType="com.spinfosec.dao.entity.SpTask">
+        UPDATE sp_task
+        <set>
+            <if test="jobId != null">
+                jobId = #{jobId,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null">
+                startTime = #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                endTime = #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="failReason != null">
+                failReason = #{failReason,jdbcType=VARCHAR},
+            </if>
+            <if test="result != null">
+                result = #{result,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="isLast != null">
+                isLast = #{isLast,jdbcType=VARCHAR},
+            </if>
+            <if test="size != null">
+                size = #{size,jdbcType=VARCHAR},
+            </if>
+            <if test="orgId != null">
+                orgId = #{orgId,jdbcType=VARCHAR},
+            </if>
+            <if test="orgName != null">
+                orgName = #{orgName,jdbcType=VARCHAR},
+            </if>
+            <if test="totalCount != null">
+                totalCount = #{totalCount,jdbcType=VARCHAR},
+            </if>
+            <if test="totalRecordCount != null">
+                totalRecordCount = #{totalRecordCount,jdbcType=VARCHAR},
+            </if>
+            <if test="successCount != null">
+                successCount = #{successCount,jdbcType=VARCHAR},
+            </if>
+            <if test="successRecordCount != null">
+                successRecordCount = #{successRecordCount,jdbcType=VARCHAR},
+            </if>
+            <if test="failCount != null">
+                failCount = #{failCount,jdbcType=VARCHAR},
+            </if>
+            <if test="failRecordCount != null">
+                failRecordCount = #{failRecordCount,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateTaskIsLastByJobId" parameterType="java.lang.String">
+        UPDATE sp_task SET isLast = #{isLast} WHERE jobId = #{jobid}
+    </update>
+
+    <select id="getTaskByConditionMap" parameterType="java.util.HashMap" resultType="com.spinfosec.dao.entity.SpTask">
+        SELECT
+        ID AS id,
+        jobId AS jobId,
+        name AS name,
+        type AS type,
+        startTime AS startTime,
+        endTime AS endTime,
+        failReason AS failReason,
+        result AS result,
+        status AS status,
+        isLast AS isLast,
+        size AS size,
+        orgId AS orgId,
+        orgName AS orgName,
+        totalCount AS totalCount,
+        totalRecordCount AS totalRecordCount,
+        successCount AS successCount,
+        successRecordCount AS successRecordCount,
+        failCount AS failCount,
+        failRecordCount AS failRecordCount
+        FROM sp_task WHERE 1 = 1
+        <if test="jobId != null">
+            AND jobId = #{jobId}
+        </if>
+        <if test="isLast">
+            AND isLast = #{isLast}
+        </if>
+        <if test="result">
+            AND result = #{result}
+        </if>
+    </select>
+
+    <delete id="deletePresetTask" parameterType="java.lang.String">
+        DELETE FROM sp_task WHERE jobId = #{jobid} AND result = "UNSTART";
+    </delete>
+
+    <select id="getTaskNum" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT COUNT(dis.ID)
+        FROM sp_discovery_tasks dis LEFT JOIN sp_task t ON dis.ID = t.jobId
+        WHERE 1 = 1
+        <if test="userId != null and userId != ''">
+            AND dis.CREATED_BY = #{userId}
+        </if>
+        <if test="status == null">
+            AND (t.isLast IS NULL OR t.isLast = '1')
+        </if>
+        <if test="status  == 'unstart'.toString()">
+            AND t.status IS NULL
+        </if>
+        <if test="status  == 'alreadyRun'.toString()">
+            AND (t.isLast IS NULL OR t.isLast = '1')
+            AND t.status IS NOT NULL
+        </if>
+    </select>
+
+    <select id="getTaskNumTimeAgo" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT COUNT(dis.ID)
+        FROM sp_discovery_tasks dis LEFT JOIN sp_task t ON dis.ID =
+        t.jobId   <!-- < &lt; <= &lt; > &gt; >= &gt;=  != <![CDATA[!=]]>  -->
+        WHERE 1 = 1
+        <if test="userId != null and userId != ''">
+            AND dis.CREATED_BY = #{userId}
+        </if>
+        <if test="status == null">
+            AND (t.isLast IS NULL OR t.isLast = '1')
+            AND dis.CREATE_DATE BETWEEN DATE_SUB(NOW(),INTERVAL 1 WEEK) AND NOW() /*全部任务以策略创建时间为主，因为有的策略没运行没有start开始时间*/
+        </if>
+        <if test="status  == 'unstart'.toString()">
+            AND t.status IS NULL /*未运行任务以策略创建时间为主，因为未运行任务没有start开始时间，并且任务状态为null，*/
+            AND dis.CREATE_DATE BETWEEN DATE_SUB(NOW(),INTERVAL 1 WEEK) AND NOW()
+        </if>
+        <if test="status  == 'alreadyRun'.toString()">
+            AND (t.isLast IS NULL OR t.isLast = '1')
+            AND t.status IS NOT NULL /*已运行任务以任务开始时间start为主，并且务状态不为null*/
+            AND t.startTime BETWEEN DATE_SUB(NOW(),INTERVAL 1 WEEK) AND NOW()
+        </if>
+    </select>
+</mapper>
